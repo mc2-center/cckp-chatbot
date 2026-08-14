@@ -1,6 +1,8 @@
 # KB Routing Benchmark
 
-Evaluates whether the NF Portal multi-source Bedrock Agent selects the correct knowledge source for each query type. See [issue #36](https://github.com/nf-osi/portal-chatbot/issues/36).
+Evaluates whether the CCKP Copilot's multi-source Bedrock Agent selects the correct knowledge source for each query type. Forked from the NF Portal Copilot's equivalent benchmark (see [nf-osi/portal-chatbot#36](https://github.com/nf-osi/portal-chatbot/issues/36)).
+
+> **Status:** `kb_routing_dataset.json` has been reset to an empty array — the previous NF-domain sessions (biobanks, IRB/consent for human genetic data, embargo periods, etc.) encoded NF Data Portal policy and would be misleading if kept as CCKP examples. Populate it with real CCKP sessions before running an eval; see Step 1 below.
 
 ## Background
 
@@ -8,8 +10,8 @@ The agent has two knowledge sources:
 
 | Source | Label | Description | Detection |
 |--------|-------|-------------|-----------|
-| NF Help Docs KB | `DOCS` | Bedrock KB built from help.nf.synapse.org | `KNOWLEDGE_BASE` trace event or `WEB` citation |
-| NF-OSI Knowledge Graph | `GRAPH` | Structured RDF graph via SPARQL action groups | `ACTION_GROUP` trace event |
+| CCKP Help Docs KB | `DOCS` | Bedrock KB built from help.cancercomplexity.synapse.org | `KNOWLEDGE_BASE` trace event or `WEB` citation |
+| CCKP Resource Backend | `GRAPH` | SQL over Synapse View tables, or SPARQL over a knowledge graph, via action groups | `ACTION_GROUP` trace event |
 
 **This benchmark measures source routing, not answer correctness.** The primary metric is whether the agent consulted the right knowledge source — determined from Bedrock trace events — not whether the response text matches a gold answer. This is distinct from the general-help eval, which scores answer quality against known correct answers for a single-source agent. Answer quality is recorded here as a secondary metric only.
 
@@ -51,7 +53,7 @@ The agent has two knowledge sources:
 | Value | Meaning |
 |-------|---------|
 | `DOCS` | Agent should use the documentation KB (process, policy, how-tos) |
-| `GRAPH` | Agent should use SPARQL action groups (counts, lists, specific records) |
+| `GRAPH` | Agent should use the resource-backend action group (counts, lists, specific records) |
 | `BOTH` | Either source is acceptable, or both should be used for a compound question |
 | `REDIRECT` | Agent should navigate the user via a redirect action (no KB lookup needed) |
 | `NONE` | No KB lookup expected — agent should answer from general knowledge or decline |
@@ -61,7 +63,7 @@ The agent has two knowledge sources:
 | Value | Meaning |
 |-------|---------|
 | `DOCS` | All turns expect the documentation KB |
-| `GRAPH` | All turns expect the KG / SPARQL action groups |
+| `GRAPH` | All turns expect the resource-backend action group |
 | `MIXED` | Turns route to different sources within the same session |
 | `BOTH` | All turns accept either or both sources (compound or ambiguous questions) |
 | `NONE` | No KB lookup expected for any turn |
@@ -70,12 +72,12 @@ The agent has two knowledge sources:
 
 | `session_type` | Sessions | Single-turn | Multi-turn | Turns |
 |----------------|----------|-------------|------------|-------|
-| DOCS | 1 | — | 1 | 2 |
-| GRAPH | 2 | — | 2 | 5 |
-| MIXED | 10 | — | 10 | 25 |
-| BOTH | 2 | 1 | 1 | 3 |
-| NONE | 2 | 1 | 1 | 3 |
-| **Total** | **17** | **2** | **15** | **38** |
+| DOCS | 0 | — | — | 0 |
+| GRAPH | 0 | — | — | 0 |
+| MIXED | 0 | — | — | 0 |
+| BOTH | 0 | — | — | 0 |
+| NONE | 0 | — | — | 0 |
+| **Total** | **0** | **0** | **0** | **0** |
 
 ---
 
@@ -91,7 +93,7 @@ Add sessions directly to `kb_routing_dataset.json` following the schema in `kb_r
 - Check that multi-turn sessions flow naturally (follow-up turns are coherent).
 - Flag questions where either source gives a valid answer (change `expected` to `BOTH`); this includes both compound questions and genuinely ambiguous queries.
 - Ensure GRAPH questions can't be answered from docs alone.
-- Ensure DOCS questions don't require live KG data.
+- Ensure DOCS questions don't require live resource-backend data.
 
 ---
 
@@ -122,17 +124,16 @@ AWS credentials with access to the Bedrock Agent and Bedrock Runtime.
 
 ```bash
 cd benchmark/kb-routing
-python evaluate_kb_routing.py                          # routing only (~8 min for 34 turns)
-python evaluate_kb_routing.py --judge                  # also run LLM judge for answer quality
-python evaluate_kb_routing.py -n 3                     # quick test: first 3 sessions only
-python evaluate_kb_routing.py --agent-id ERAAPKTD4Q    # test a different agent
+python evaluate_kb_routing.py --agent-id ABC123                  # routing only
+python evaluate_kb_routing.py --agent-id ABC123 --judge          # also run LLM judge
+python evaluate_kb_routing.py --agent-id ABC123 -n 3             # quick test: first 3 sessions
 ```
 
-The default alias `TSTALIASID` always points to the DRAFT version. If you've updated the agent (instructions, model, action groups) without preparing it, run `aws bedrock-agent prepare-agent --agent-id <ID>` first — otherwise the eval will test the previous prepared version, not your latest changes.
+`--agent-id` is required — no CCKP agent has been deployed yet. The default alias `TSTALIASID` always points to the DRAFT version. If you've updated the agent (instructions, model, action groups) without preparing it, run `aws bedrock-agent prepare-agent --agent-id <ID>` first — otherwise the eval will test the previous prepared version, not your latest changes.
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--agent-id` | `ERAAPKTD4Q` | Bedrock Agent ID (dev) |
+| `--agent-id` | _(required)_ | Bedrock Agent ID — no CCKP agent is deployed yet |
 | `--alias-id` | `TSTALIASID` | Bedrock Agent alias ID (DRAFT) |
 | `-n` | all | Only run the first N sessions |
 | `--judge` | off | Enable LLM judge for answer quality scoring |

@@ -2,11 +2,11 @@ import os
 import scrapy
 from markdownify import markdownify as md
 
-class NFDocsSpider(scrapy.Spider):
-    name = "nfdocs"
-    allowed_domains = ["help.nf.synapse.org"]
-    start_urls = ["https://help.nf.synapse.org/nf-data-portal-documentation"]
-    BASE_URL = "https://help.nf.synapse.org/nf-data-portal-documentation"
+class CCKPDocsSpider(scrapy.Spider):
+    name = "cckpdocs"
+    allowed_domains = ["help.cancercomplexity.synapse.org"]
+    start_urls = ["https://help.cancercomplexity.synapse.org"]
+    BASE_URL = "https://help.cancercomplexity.synapse.org"
 
     def parse(self, response):
         # Extract the title from the page and clean it up.
@@ -31,7 +31,7 @@ class NFDocsSpider(scrapy.Spider):
                 f.write(markdown_with_url)
             self.log(f"Saved file: {file_path}")
 
-        # Follow all internal links under /nf-data-portal-documentation.
+        # Follow all internal links under the CCKP help docs base URL.
         for href in response.css("a::attr(href)").getall():
             next_page = response.urljoin(href)
             if next_page.startswith(self.BASE_URL):

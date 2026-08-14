@@ -1,0 +1,160 @@
+openapi: 3.0.0
+info:
+  title: CCKP SQL Function API
+  version: 1.0.0
+  description: >
+    This schema describes the three agent-facing functions for querying the
+    Cancer Complexity Knowledge Portal (CCKP)'s curated Synapse View tables
+    directly via SQL (no knowledge graph / SPARQL endpoint required). A
+    Lambda adapter maps these operations to Bedrock action-group style
+    function calls via apiPath or function name.
+tags:
+  - name: sql
+    description: SQL query and introspection operations over the CCKP View tables
+paths:
+  /sql-query:
+    post:
+      tags:
+        - sql
+      operationId: sqlQuery
+      summary: Execute a SQL query against one CCKP table
+      description: >
+        Runs a SQL query against one of the CCKP's Synapse View tables
+        (datasets, publications, tools, grants, education, or a raw synId)
+        and returns matching rows plus the total match count. The literal
+        `{table}` in the sql string is replaced with the resolved synId.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SqlQueryRequest"
+            examples:
+              breastCancerDatasets:
+                value:
+                  table: datasets
+                  sql: SELECT * FROM {table} WHERE "tumorType" LIKE '%reast%'
+                  limit: 25
+      responses:
+        "200":
+          description: Query result rows or application-level error payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueryResultResponse"
+  /columns:
+    post:
+      tags:
+        - sql
+      operationId: getColumns
+      summary: List the exact column names of one CCKP table
+      description: >
+        Returns the deployed column names for one table. Deployed names can
+        differ slightly from the data-model labels, so call this before
+        writing a SQL query against an unfamiliar table.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetColumnsRequest"
+            examples:
+              datasets:
+                value:
+                  table: datasets
+      responses:
+        "200":
+          description: Requested column list or application-level error payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetColumnsResponse"
+  /count-by-type:
+    post:
+      tags:
+        - sql
+      operationId: countByType
+      summary: Count rows in each of the 5 CCKP tables
+      description: >
+        Returns a quick portal inventory: the row count of each of the
+        datasets, publications, tools, grants, and education tables.
+      responses:
+        "200":
+          description: Per-table row counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountByTypeResponse"
+components:
+  schemas:
+    SqlQueryRequest:
+      type: object
+      required:
+        - table
+        - sql
+      properties:
+        table:
+          type: string
+          description: >
+            Table alias (datasets, publications, tools, grants, education)
+            or a raw Synapse synId.
+        sql:
+          type: string
+          description: >
+            SQL query text. The literal `{table}` is replaced with the
+            resolved synId before execution.
+        limit:
+          type: integer
+          description: Maximum rows to return (default 25, max 200).
+      additionalProperties: false
+    GetColumnsRequest:
+      type: object
+      required:
+        - table
+      properties:
+        table:
+          type: string
+          description: >
+            Table alias (datasets, publications, tools, grants, education)
+            or a raw Synapse synId.
+      additionalProperties: false
+    QueryResultResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Total matching row count (independent of limit).
+        headers:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+        error:
+          type: string
+          description: Application-level error text returned by the function.
+      additionalProperties: false
+    GetColumnsResponse:
+      type: object
+      properties:
+        table:
+          type: string
+        columns:
+          type: array
+          items:
+            type: string
+        error:
+          type: string
+      additionalProperties: false
+    CountByTypeResponse:
+      type: object
+      properties:
+        counts:
+          type: object
+          description: Map of table alias to row count.
+        errors:
+          type: object
+          description: Map of table alias to error text, present only on partial failure.
+      additionalProperties: false

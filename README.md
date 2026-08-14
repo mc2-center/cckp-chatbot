@@ -1,10 +1,12 @@
-# NF Portal Chatbot
+# CCKP Chatbot
 
-Development and configuration for NF Portal-flavored Synapse chatbots.
+Development and configuration for CCKP (Cancer Complexity Knowledge Portal)-flavored Synapse chatbots.
+
+Forked from [nf-osi/portal-chatbot](https://github.com/nf-osi/portal-chatbot) (the NF Portal Copilot) and re-targeted at the CCKP, maintained by Sage Bionetworks' MC2 Center.
 
 ## Description
 
-This repository contains configuration, test datasets, and other resources for NF Portal-tailored Synapse chatbots.
+This repository contains configuration, test datasets, and other resources for CCKP-tailored Synapse chatbots.
 
 ## Documentation
 
@@ -12,31 +14,32 @@ Guides and architecture notes live in [`docs/`](docs/). The docs site is built w
 
 ## Agent Registrations
 
-For details on all registered agents (including legacy v0 and other versions in development), see [agents/README.md](agents/README.md). 
-(Note: Creating agents for Synapse is not generally available to all Synapse users. 
+For details on all registered agents (including the two backend variants — SQL over Synapse View tables, and SPARQL over a knowledge graph), see [agents/README.md](agents/README.md).
+(Note: Creating agents for Synapse is not generally available to all Synapse users.
 Nevertheless, if you came across this project and have interest and funding for Synapse agents and portals, feel free to reach out to us.)
+
+No CCKP Copilot has been deployed yet — see [agents/README.md](agents/README.md)'s "Open items before first deploy" for what's needed.
 
 ## PHD Benchmarking and Evaluation
 
-The Portal Help & Discovery (PHD) suite is a set of benchmarking and evaluation datasets to ensure quality standards and quantify improvements in our chatbot agents. 
-Within our framework, these resources also help identify documentation gaps and inconsistencies. 
-Not all datasets are stored here in this repo; references to relevant datasets will be kept up to date. 
+The Portal Help & Discovery (PHD) suite is a set of benchmarking and evaluation datasets to ensure quality standards and quantify improvements in our chatbot agents.
+Within our framework, these resources also help identify documentation gaps and inconsistencies.
+Not all datasets are stored here in this repo; references to relevant datasets will be kept up to date.
 
 ### General Help Component
 
-The General Help component tests the agent's ability to answer questions about NF Portal navigation, features, history, and general usage. 
-The agent answers questions based on the Synapse + NF portal help docs. 
+The General Help component tests the agent's ability to answer questions about CCKP navigation, features, history, and general usage.
+The agent answers questions based on the Synapse + CCKP help docs.
 
-- [Test questions about NF Portal](benchmark/general-help/) -- an updated and expanded version expected soon
-- Portal page navigation -- TODO
+- [Test questions about the CCKP](benchmark/general-help/) — reset pending a fresh crawl of help.cancercomplexity.synapse.org; see the benchmark's README
 
 ### Discovery Component
 
-There will eventually be multiple implementations falling under the Discovery component. 
-Some of the below may arguably focus more on search; the distinction sometimes depend on user phrasing. 
-(Note: Search is more goal-oriented with targeted results. Discovery is for browsing, recommendations, and understanding what's available. Discovery is harder to evaluate.) 
+There will eventually be multiple implementations falling under the Discovery component.
+Some of the below may arguably focus more on search; the distinction sometimes depend on user phrasing.
+(Note: Search is more goal-oriented with targeted results. Discovery is for browsing, recommendations, and understanding what's available. Discovery is harder to evaluate.)
 
-- [Finding answers and connections with NF knowledgegraph](https://github.com/nf-osi/kg-pipeline/tree/develop/evaluation/main) 
+- Finding answers and connections with the CCKP knowledge graph — [mc2-center/data-models/kg-pipeline](https://github.com/mc2-center/data-models/tree/main/kg-pipeline) builds the underlying graph; a discovery-QA benchmark analogous to [nf-osi/kg-pipeline's evaluation](https://github.com/nf-osi/kg-pipeline/tree/develop/evaluation/main) has not yet been built from it — a candidate follow-up.
 
 ## Contributing
 
@@ -59,13 +62,13 @@ We welcome contributions to improve the chatbot. To contribute:
 
 ## Acknowledgements
 
-We thank the [Gilbert Family Foundation](https://gilbertfamilyfoundation.org/) for funding much of this work.
+Adapted from the NF Portal Copilot, built by NF-OSI with funding from the [Gilbert Family Foundation](https://gilbertfamilyfoundation.org/).
 
 ## See Also
 
 - https://rest-docs.synapse.org/rest/index.html#org.sagebionetworks.repo.web.controller.AgentController
 - [Synapse Custom Agents framework](https://sagebionetworks.jira.com/wiki/spaces/PLFM/pages/3711303683/Adding+Custom+Agents+to+Synapse) (Internal Confluence page)
-- [NF design doc](https://sagebionetworks.jira.com/wiki/spaces/NPD/pages/3899359241/NF+Portal+Assistant+Agent) (Internal Confluence page) 
+- [mc2-center/data-models](https://github.com/mc2-center/data-models) — the CCKP/MC2 Center data model, including the `kg-pipeline` knowledge-graph pipeline referenced above
 
 ## License
 

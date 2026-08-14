@@ -43,11 +43,13 @@ If you have multiple sources, you should also have a **source selection benchmar
 
 You should also have an **adversarial benchmark** — the above benchmarks test whether the agent behaves well on ordinary questions; a [red teaming](/docs/benchmarking-and-evaluation/red-teaming/) benchmark tests whether it holds up against a user actively trying to make it misbehave (leak internal details, give unsafe guidance, exceed its intended scope).
 
-In the NF Portal Copilot, we have:
+The CCKP Copilot has (or will have, once deployed):
 
-- **Source selection eval** (`benchmark/kb-routing/`) — multi-turn sessions labeled with the expected source per turn (docs, graph, redirect, or none). Measures whether the agent consults the right source, and whether it over-queries by consulting unnecessary sources. See [Source routing](/docs/benchmarking-and-evaluation/source-routing/).
+- **Source selection eval** (`benchmark/kb-routing/`) — multi-turn sessions labeled with the expected source per turn (docs, resource backend, redirect, or none). Measures whether the agent consults the right source, and whether it over-queries by consulting unnecessary sources. See [Source routing](/docs/benchmarking-and-evaluation/source-routing/).
 - **Docs KB eval** (`benchmark/general-help/`) — multiple-choice questions generated from help documentation, scored by an LLM judge against known correct answers. See [Grounded retrieval](/docs/benchmarking-and-evaluation/grounded-retrieval/).
 - **Adversarial eval** (`benchmark/redteam/`) — an attacker LLM probes the agent with techniques like prompt injection, roleplay, and multi-turn escalation, and a judge LLM scores whether each attack succeeded. See [Red teaming](/docs/benchmarking-and-evaluation/red-teaming/).
+
+No CCKP agent has been deployed yet, so the datasets below carry over the NF Portal Copilot's structure as a starting scaffold but need fresh CCKP-domain content before they're meaningful — see each benchmark's README for what's still a placeholder.
 
 ## Building your own benchmarks
 

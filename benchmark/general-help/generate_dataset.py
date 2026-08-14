@@ -66,7 +66,7 @@ def build_anthropic_tool(schema):
     clean_schema = {k: v for k, v in schema.items() if k not in ("$schema", "title")}
     return {
         "name": "generate_qa_dataset",
-        "description": "Generate a QA dataset of multiple-choice questions from NF Data Portal documentation.",
+        "description": "Generate a QA dataset of multiple-choice questions from CCKP documentation.",
         "input_schema": {
             "type": "object",
             "properties": {"questions": clean_schema},
@@ -75,7 +75,7 @@ def build_anthropic_tool(schema):
     }
 
 def build_prompts(batch_docs, schema, n_questions):
-    system_content = """You are an AI assistant specializing in the NF Data Portal and NF Research Tools Central, platforms dedicated to neurofibromatosis (NF) research. Your role is to assist users in navigating these resources, understanding their content, and locating specific data files, datasets, analysis tools, and publications related to NF1, NF2, and schwannomatosis.
+    system_content = """You are an AI assistant specializing in the Cancer Complexity Knowledge Portal (CCKP), a platform dedicated to cancer research resources — datasets, publications, tools, grants, and educational resources. Your role is to assist users in navigating these resources, understanding their content, and locating specific data files, datasets, analysis tools, and publications related to cancer research.
 
 Your task is to generate multiple-choice questions from the provided documentation pages.
 Each question must include:
@@ -87,7 +87,7 @@ Each question must include:
       - CONTRIBUTOR: a new data contributor
       - REUSER: a researcher reanalyzing data
       - FUNDER: a funder from a government program or nonprofit
-      - PATIENT: a patient with NF1, Schwannomatosis, or a related disorder
+      - PATIENT: a patient or advocate researching a cancer type or condition
       - X: unspecified
   - page_urls: List of source page URLs. Use multiple URLs for cross-page questions that draw on content from more than one of the provided pages.
   - context: Text snippet grounding the correct answer. For cross-page questions, include snippets from each source page.
@@ -95,7 +95,7 @@ Each question must include:
 Aim for a mix of single-page and cross-page questions where cross-page questions compare or combine information across the provided pages."""
 
     schema_str = json.dumps(schema, indent=2)
-    user_content = f"""# NF Data Portal Documentation
+    user_content = f"""# CCKP Documentation
 
 {batch_docs}
 
@@ -173,7 +173,7 @@ def find_page_file(markdown_dir, query):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate QA dataset from NF docs.")
+    parser = argparse.ArgumentParser(description="Generate QA dataset from CCKP docs.")
     parser.add_argument(
         "--provider",
         choices=["openai", "anthropic"],

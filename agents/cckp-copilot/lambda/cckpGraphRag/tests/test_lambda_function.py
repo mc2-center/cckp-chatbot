@@ -1,4 +1,4 @@
-"""Unit tests for the nfGraphRag Lambda function.
+"""Unit tests for the cckpGraphRag Lambda function.
 
 All SPARQL network calls are mocked so no endpoint is needed.
 """
@@ -27,7 +27,7 @@ def _api_event(api_path, properties=None, http_method="POST"):
     """Build a Bedrock action-group event using the apiPath style."""
     return {
         "messageVersion": "1.0",
-        "actionGroup": "nfGraphRag",
+        "actionGroup": "cckpGraphRag",
         "apiPath": api_path,
         "httpMethod": http_method,
         "requestBody": {
@@ -44,7 +44,7 @@ def _function_event(function, parameters=None):
     """Build a Bedrock action-group event using the function style."""
     return {
         "messageVersion": "1.0",
-        "actionGroup": "nfGraphRag",
+        "actionGroup": "cckpGraphRag",
         "function": function,
         "parameters": parameters or [],
     }
@@ -182,20 +182,20 @@ class TestHandlerRouting:
     @patch("lambda_function.sparql_request", return_value=TSV_STUB)
     def test_get_shape_api_path(self, _mock):
         event = _api_event("/shape", [
-            {"name": "className", "value": "CellLine"},
+            {"name": "className", "value": "Dataset"},
         ])
         resp = lambda_handler(event, None)
         body = _body(resp)
-        assert body["className"] == "CellLine"
+        assert body["className"] == "Dataset"
         assert body["resultTsv"] == TSV_STUB
 
     @patch("lambda_function.sparql_request", return_value=TSV_STUB)
     def test_get_shape_function_with_prefix(self, _mock):
         event = _function_event("getShape", [
-            {"name": "className", "value": "nf:AnimalModel"},
+            {"name": "className", "value": "cckp:Tool"},
         ])
         resp = lambda_handler(event, None)
-        assert _body(resp)["className"] == "AnimalModel"
+        assert _body(resp)["className"] == "Tool"
 
     @patch("lambda_function.sparql_request", return_value=TSV_STUB)
     def test_count_by_type_api_path(self, _mock):
@@ -267,7 +267,7 @@ class TestHandlerErrorPaths:
         "Foo.Bar",            # dot
         "A}B",                # closing brace
         "x; DROP",            # semicolon
-        "nf:Bad>Name",        # angle bracket (after prefix strip)
+        "cckp:Bad>Name",      # angle bracket (after prefix strip)
     ])
     def test_invalid_classname_rejected(self, bad_name):
         event = _api_event("/shape", [{"name": "className", "value": bad_name}])
@@ -276,9 +276,9 @@ class TestHandlerErrorPaths:
         assert "Invalid className" in body.get("error", "")
 
     @pytest.mark.parametrize("good_name", [
-        "CellLine",
-        "AnimalModel",
-        "nf:CellLine",
+        "Dataset",
+        "Tool",
+        "cckp:Dataset",
         "_Private",
         "Type2",
     ])

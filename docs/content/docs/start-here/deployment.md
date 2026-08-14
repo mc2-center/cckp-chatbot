@@ -7,18 +7,18 @@ weight: 40
 
 ## Two stacks: dev and prod
 
-We run the same template as two stacks: `nf-portal-copilot-dev` and `nf-portal-copilot-prod`. This gives you:
+We run each template as two stacks — for the recommended SQL backend, `cckp-copilot-sql-dev` and `cckp-copilot-sql-prod` (the SPARQL backend's `cckp-copilot-sparql-dev/prod` follow the same pattern once it's deployable). This gives you:
 
 - A safe place to test instruction changes, model swaps, and Lambda updates before they reach users
 - Isolated IAM roles, Lambda functions, and agent IDs per environment
 - Separate Lambda packages so a bad dev deploy can't affect prod
 - Dev uses the `TSTALIASID` test alias which always points to DRAFT — so you're always testing your latest changes
 
-The workflow is: make changes on a branch → manually trigger the `deploy-copilot` workflow to push to dev → test → merge to main → prod updates automatically.
+The workflow is: make changes on a branch → manually trigger the `deploy-copilot-sql` (or `-sparql`) workflow to push to dev → test → merge to main → prod updates automatically.
 
 ## CI/CD setup
 
-The GitHub Actions workflow (`.github/workflows/deploy-copilot.yml`) handles deployments. It's smart about what changed:
+The GitHub Actions workflows (`.github/workflows/deploy-copilot-sql.yml` and `deploy-copilot-sparql.yml`) handle deployments, one per backend. Each is smart about what changed:
 
 - Lambda code only → uploads zip and calls `update-function-code` directly (no stack update needed)
 - Template/instructions/schema → runs `cloudformation deploy`
@@ -30,13 +30,13 @@ To set this up for your repo, you need a repo-specific IAM role for GitHub OIDC.
 - Trust `token.actions.githubusercontent.com` scoped to your repo and branch
 - Have least-privilege permissions: S3 write on your Lambda bucket prefix, Lambda update on your function names, CloudFormation update on your two stack names, IAM manage on your copilot role names, Bedrock agent operations
 
-See `GitHubActionsNFPortalChatbot` in the `org-sagebase-synapsellm-prod` account as a reference. Once created, store the role ARN as `AWS_OIDC_ROLE_ARN` in your repo secrets.
+No such role exists yet for this repo. The NF Portal Copilot's `GitHubActionsNFPortalChatbot` role (in the `org-sagebase-synapsellm-prod` account) is a reference for the permission shape; an admin needs to provision an equivalent (e.g. `GitHubActionsCCKPChatbot`) scoped to `mc2-center/cckp-chatbot`. Once created, store the role ARN as `AWS_OIDC_ROLE_ARN` in this repo's secrets.
 
 ## Knowledge base
 
 KBs are created and managed separately from the agent template — they have their own vector store, embedding model, data sources, and sync schedule. Create yours via the console or CLI, then pass the ID as the `KnowledgeBaseId` template parameter.
 
-The NF Portal uses the NF docs KB built from help.nf.synapse.org. For your portal you'll want a KB built from your own help docs.
+CCKP's docs KB should be built from a crawl of help.cancercomplexity.synapse.org — no such KB has been built yet. Both templates ship with a `REPLACE_ME_CCKP_KB_ID` placeholder until one exists.
 
 ## Agent registration with Synapse
 

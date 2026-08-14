@@ -9,7 +9,7 @@ weight: 20
 
 Grounded retrieval evaluates a single knowledge source in isolation: given a question with a known correct answer, does the agent retrieve the right document and produce an answer consistent with it? This is the baseline eval every portal copilot needs — any agent with at least one docs knowledge base should have one of these, even before adding [source routing](/docs/benchmarking-and-evaluation/source-routing/) for multi-source setups.
 
-The NF Portal Copilot's version of this is the **general-help benchmark** (`benchmark/general-help/`), which evaluates the docs KB built from help.nf.synapse.org.
+The CCKP Copilot's version of this is the **general-help benchmark** (`benchmark/general-help/`), which evaluates the docs KB built from help.cancercomplexity.synapse.org.
 
 ## How the dataset is built
 
@@ -23,14 +23,14 @@ A dataset entry looks like:
 
 ```json
 {
-  "question": "What is the default license applied to non-human data submitted to the NF Data Portal?",
+  "question": "What is the default license applied to non-human data submitted to the CCKP?",
   "mc1_targets": {
     "choices": ["CC BY 4.0 (Attribution)", "CC0 (No Rights Reserved)", "CC BY-SA (Attribution-ShareAlike)", "All Rights Reserved"],
     "labels": [0, 1, 0, 0]
   },
   "persona": "CONTRIBUTOR",
-  "page_urls": ["https://help.nf.synapse.org/nf-data-portal-documentation/contributing-data/about-data-licensing"],
-  "context": "As a data contributor, you will select the license that applies to your data. The default option for non-human data is CC0..."
+  "page_urls": ["https://help.cancercomplexity.synapse.org/..."],
+  "context": "..."
 }
 ```
 
@@ -38,27 +38,7 @@ Although the dataset is multiple-choice, evaluation runs in **free-response** fo
 
 ## Examples from a real run
 
-Drawn from a 50-question run (`eval_results_20260514T223326Z.json`) against the docs KB agent. Overall accuracy that run: **40/50 (80%)**, with correct source attribution on 40/50 answers.
-
-### Grounded and correct
-
-**Question:** "What is the default license applied to non-human data submitted to the NF Data Portal?"
-
-The agent cited the expected page and gave the correct answer:
-
-> "The default license applied to non-human data submitted to the NF Data Portal is CC0 (Creative Commons Zero). This is described as a 'no rights reserved' license by Creative Commons... Data contributors can select the license that applies to their data during submission, with CC0 being the default option specifically for non-human data."
-
-Judge score: **2/2** (correct). Cited URL matched the expected source exactly.
-
-### Honest gap instead of a hallucination
-
-**Question:** "What is the maximum file download size supported through the Synapse web interface?" (expected answer: "5 GB or 100 files")
-
-The agent found nothing relevant in the KB and said so, rather than guessing:
-
-> "I apologize, but I wasn't able to find specific information about the maximum file download size supported through the Synapse web interface in the available documentation... I recommend: 1. Checking the official Synapse documentation... 2. Contacting Synapse support directly..."
-
-Judge score: **0/2** (incorrect — the answer wasn't retrieved). This scores as a failure, but it's the failure mode you want: no citation, no invented number, an honest "I don't have this" plus a pointer elsewhere. The alternative — a confident wrong number — would be a groundedness failure, not just a coverage gap. This kind of miss usually means either the content isn't in the crawled docs, or it's there but wasn't retrieved for this query — worth checking both when triaging misses.
+No CCKP agent has been deployed yet, so there's no real eval run to draw examples from. Once `benchmark/general-help/cckpdocs_spider.py` has crawled help.cancercomplexity.synapse.org and `generate_dataset.py` has produced a human-validated question set, run `evaluate_bedrock_agent.py` against a deployed dev agent and replace this section with real results — including at least one example of a **grounded and correct** answer and one **honest gap** (the agent saying "I don't have this" rather than guessing), which is the failure mode worth normalizing rather than penalizing away.
 
 ## Running it
 

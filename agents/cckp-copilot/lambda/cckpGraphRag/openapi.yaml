@@ -1,14 +1,18 @@
 openapi: 3.0.0
 info:
-  title: NF RAG Function API
+  title: CCKP Graph RAG Function API
   version: 1.0.0
   description: >
-    This schema describes the four agent-facing functions for NF knowledgegraph
-    RAG. A Lambda adapter maps these operations to Bedrock action-group style
-    function calls via apiPath or function name.
+    This schema describes the four agent-facing functions for CCKP knowledge
+    graph RAG. A Lambda adapter maps these operations to Bedrock action-group
+    style function calls via apiPath or function name.
+
+    NOTE: this backend requires a hosted SPARQL endpoint serving the triples
+    produced by mc2-center/data-models/kg-pipeline (data/rdf/cckp_kg.ttl).
+    No such endpoint is deployed yet — see agents/README.md.
 tags:
   - name: sparql
-    description: SPARQL and schema helper operations for the NF-OSI knowledge graph
+    description: SPARQL and schema helper operations for the CCKP knowledge graph
 paths:
   /sparql-query:
     post:
@@ -17,9 +21,9 @@ paths:
       operationId: sparqlQuery
       summary: Execute an arbitrary SPARQL query
       description: >
-        Runs a SPARQL query against the configured NF-OSI SPARQL endpoint and
-        returns TSV text. The implementation prepends the default NF ontology
-        prefixes automatically.
+        Runs a SPARQL query against the configured CCKP SPARQL endpoint and
+        returns TSV text. The implementation prepends the default CCKP
+        ontology prefixes automatically.
       requestBody:
         required: true
         content:
@@ -58,11 +62,11 @@ paths:
       tags:
         - sparql
       operationId: getShape
-      summary: Retrieve the SHACL shape for one NF class
+      summary: Retrieve the SHACL shape for one CCKP class
       description: >
         Returns a TSV table describing the SHACL node shape and property
         constraints for the requested class. The class name may be passed either
-        as a local name like CellLine or as a prefixed value like nf:CellLine.
+        as a local name like Dataset or as a prefixed value like cckp:Dataset.
       requestBody:
         required: true
         content:
@@ -70,9 +74,9 @@ paths:
             schema:
               $ref: "#/components/schemas/GetShapeRequest"
             examples:
-              cellLine:
+              dataset:
                 value:
-                  className: CellLine
+                  className: Dataset
       responses:
         "200":
           description: Requested shape or application-level error payload
@@ -106,7 +110,7 @@ components:
         query:
           type: string
           description: >
-            SPARQL query text. The Lambda implementation prepends the default NF
+            SPARQL query text. The Lambda implementation prepends the default CCKP
             ontology prefixes automatically.
       additionalProperties: false
     GetShapeRequest:
@@ -117,8 +121,8 @@ components:
         className:
           type: string
           description: >
-            Class local name such as CellLine or AnimalModel, or a prefixed name
-            like nf:CellLine.
+            Class local name such as Dataset or Grant, or a prefixed name
+            like cckp:Dataset.
       additionalProperties: false
     TsvResultResponse:
       type: object

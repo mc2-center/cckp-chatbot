@@ -1,0 +1,10 @@
+{
+  "messageVersion": "1.0",
+  "agent": {
+    "name": "cckp-kg-agent",
+    "version": "test"
+  },
+  "actionGroup": "cckpGraphRag",
+  "function": "getSchema",
+  "parameters": []
+}

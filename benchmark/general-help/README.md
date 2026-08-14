@@ -1,12 +1,14 @@
 # General Help Benchmark
 
-This benchmark is used for quality assurance of the deployed NF portal chatbot. Multiple-choice questions are synthetically generated from the live NF help documentation, then validated by human reviewers before being used for evaluation.
+This benchmark is used for quality assurance of a deployed CCKP Copilot. Multiple-choice questions are synthetically generated from the live CCKP help documentation, then validated by human reviewers before being used for evaluation.
+
+> **Status:** this benchmark was forked from the NF Portal Copilot's general-help benchmark. The NF-specific dataset (`help_qa_dataset_anthropic.json`), eval results, and `reviewer_notes.yml` have been removed — they encoded NF Data Portal policy answers (licensing, embargo, file-size limits) that do not apply to CCKP and would be actively misleading if kept. Regenerate them from a real crawl of CCKP's help docs (Steps 1–3 below) before running an eval.
 
 ---
 
-## Step 1: Crawl the NF help docs
+## Step 1: Crawl the CCKP help docs
 
-The Scrapy spider (`nfdocs_spider.py`) crawls all pages under the [public NF help docs](https://help.nf.synapse.org/nf-data-portal-documentation) and converts each page into a Markdown file saved under `output_markdown/` (git-ignored).
+The Scrapy spider (`cckpdocs_spider.py`) crawls all pages under the [public CCKP help docs](https://help.cancercomplexity.synapse.org) and converts each page into a Markdown file saved under `output_markdown/` (git-ignored).
 
 #### Requirements
 
@@ -18,7 +20,7 @@ pip install scrapy markdownify
 
 ```bash
 cd benchmark/general-help
-scrapy runspider nfdocs_spider.py
+scrapy runspider cckpdocs_spider.py
 ```
 
 Verify that `output_markdown/` was created and contains `.md` files — one per documentation page.
@@ -124,11 +126,11 @@ cd benchmark/general-help
 python evaluate_bedrock_agent.py
 ```
 
-All options have sensible defaults. Override any of them as needed:
+`--agent-id` is required — no CCKP agent has been deployed yet, so there is no default. Override any other option as needed:
 
 ```bash
 python evaluate_bedrock_agent.py \
-  --agent-id 2COISTBHRB \              # Bedrock Agent ID
+  --agent-id 2COISTBHRB \              # Bedrock Agent ID (required)
   --alias-id TSTALIASID \              # Bedrock Agent alias ID
   --profile default \                  # AWS profile from ~/.aws/credentials
   --region us-east-1 \                 # AWS region
@@ -141,7 +143,7 @@ The default alias `TSTALIASID` always points to the DRAFT version. If you've upd
 
 | Flag | Default | Description |
 |---|---|---|
-| `--agent-id` | `ERAAPKTD4Q` | Bedrock Agent ID (dev) |
+| `--agent-id` | _(required)_ | Bedrock Agent ID — no CCKP agent is deployed yet |
 | `--alias-id` | `TSTALIASID` | Bedrock Agent alias ID |
 | `--profile` | `default` | AWS profile from `~/.aws/credentials` |
 | `--region` | `us-east-1` | AWS region |

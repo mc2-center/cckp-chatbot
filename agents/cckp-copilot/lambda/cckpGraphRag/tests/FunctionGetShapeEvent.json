@@ -1,16 +1,16 @@
 {
   "messageVersion": "1.0",
   "agent": {
-    "name": "nf-kg-agent",
+    "name": "cckp-kg-agent",
     "version": "test"
   },
-  "actionGroup": "nfGraphRag",
+  "actionGroup": "cckpGraphRag",
   "function": "getShape",
   "parameters": [
     {
       "name": "className",
       "type": "string",
-      "value": "nf:AnimalModel"
+      "value": "cckp:Dataset"
     }
   ]
 }

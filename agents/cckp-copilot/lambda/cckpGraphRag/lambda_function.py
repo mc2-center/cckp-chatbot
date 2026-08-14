@@ -22,7 +22,7 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-PREFIX nf: <http://nf-osi.github.com/terms#>
+PREFIX cckp: <https://w3id.org/mc2-center/cckp-portal/>
 PREFIX efo: <http://www.ebi.ac.uk/efo/>
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX prov: <http://www.w3.org/ns/prov#>
@@ -51,7 +51,7 @@ def _make_response(action_group, api_path, http_method, http_status, body):
 
 def lambda_handler(event, context):
     """
-    Lambda handler for exposing the nf_rag SPARQL helper functions to an agent.
+    Lambda handler for exposing the cckp_rag SPARQL helper functions to an agent.
 
     The entire body is wrapped in a top-level try/except so that a well-formed
     response is *always* returned.  An unhandled exception would cause an AWS
@@ -206,7 +206,7 @@ PREFIX sh: <http://www.w3.org/ns/shacl#>
 SELECT ?shape ?label ?comment ?path ?datatype ?nodeKind ?class ?minCount ?maxCount
 WHERE {{
   ?shape a sh:NodeShape ;
-         sh:targetClass nf:{class_name} .
+         sh:targetClass cckp:{class_name} .
   OPTIONAL {{ ?shape rdfs:label ?label }}
   OPTIONAL {{ ?shape rdfs:comment ?comment }}
   OPTIONAL {{
