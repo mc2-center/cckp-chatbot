@@ -36,7 +36,7 @@ No such role exists yet for this repo. The NF Portal Copilot's `GitHubActionsNFP
 
 KBs are created and managed separately from the agent template — they have their own vector store, embedding model, data sources, and sync schedule. Create yours via the console or CLI, then pass the ID as the `KnowledgeBaseId` template parameter.
 
-CCKP's docs KB should be built from a crawl of help.cancercomplexity.synapse.org — no such KB has been built yet. Both templates ship with a `REPLACE_ME_CCKP_KB_ID` placeholder until one exists.
+CCKP's docs KB should be built from a crawl of both help.cancercomplexity.synapse.org and the MC2 Center data model docs (mc2-center.github.io/data-models) — see `benchmark/general-help/README.md` for the two spiders that crawl each source. No such KB has been built yet. Both templates ship with a `REPLACE_ME_CCKP_KB_ID` placeholder until one exists.
 
 ## Agent registration with Synapse
 

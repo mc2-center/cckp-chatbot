@@ -2,11 +2,15 @@ import os
 import scrapy
 from markdownify import markdownify as md
 
-class CCKPDocsSpider(scrapy.Spider):
-    name = "cckpdocs"
-    allowed_domains = ["help.cancercomplexity.synapse.org"]
-    start_urls = ["https://help.cancercomplexity.synapse.org"]
-    BASE_URL = "https://help.cancercomplexity.synapse.org"
+class MC2DataModelsDocsSpider(scrapy.Spider):
+    """Crawls the MC2 Center data model docs (mc2-center/data-models, an
+    MkDocs site) — entity/attribute reference material that complements the
+    CCKP help docs crawled by cckpdocs_spider.py.
+    """
+    name = "mc2datamodelsdocs"
+    allowed_domains = ["mc2-center.github.io"]
+    start_urls = ["https://mc2-center.github.io/data-models/"]
+    BASE_URL = "https://mc2-center.github.io/data-models/"
 
     def parse(self, response):
         # Extract the title from the page and clean it up.
@@ -26,14 +30,14 @@ class CCKPDocsSpider(scrapy.Spider):
             output_dir = "output_markdown"
             os.makedirs(output_dir, exist_ok=True)
             # Prefixed to avoid filename collisions with other crawled sources
-            # (e.g. mc2datamodelsdocs_spider.py) sharing the same output dir.
-            filename = f"cckp_{title}.md"
+            # (e.g. cckpdocs_spider.py) sharing the same output dir.
+            filename = f"datamodels_{title}.md"
             file_path = os.path.join(output_dir, filename)
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(markdown_with_url)
             self.log(f"Saved file: {file_path}")
 
-        # Follow all internal links under the CCKP help docs base URL.
+        # Follow all internal links under the data-models docs base URL.
         for href in response.css("a::attr(href)").getall():
             next_page = response.urljoin(href)
             if next_page.startswith(self.BASE_URL):

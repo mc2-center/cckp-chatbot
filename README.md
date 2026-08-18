@@ -29,9 +29,9 @@ Not all datasets are stored here in this repo; references to relevant datasets w
 ### General Help Component
 
 The General Help component tests the agent's ability to answer questions about CCKP navigation, features, history, and general usage.
-The agent answers questions based on the Synapse + CCKP help docs.
+The agent answers questions based on the CCKP help docs and the MC2 Center data model docs.
 
-- [Test questions about the CCKP](benchmark/general-help/) — reset pending a fresh crawl of help.cancercomplexity.synapse.org; see the benchmark's README
+- [Test questions about the CCKP](benchmark/general-help/) — reset pending a fresh crawl of help.cancercomplexity.synapse.org and mc2-center.github.io/data-models; see the benchmark's README
 
 ### Discovery Component
 

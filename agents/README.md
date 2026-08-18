@@ -24,7 +24,7 @@ No agent has been deployed yet, so there are no real Agent IDs to record here â€
 
 ## Copilot Capabilities
 
-- **Help Docs QA**: Answers process, policy, and how-to questions from the CCKP documentation (help.cancercomplexity.synapse.org)
+- **Help Docs QA**: Answers process, policy, and how-to questions from the CCKP documentation (help.cancercomplexity.synapse.org) and data-model reference questions from the MC2 Center data model docs (mc2-center.github.io/data-models)
 - **Resource Search** (SQL variant): SQL queries against the CCKP's Dataset, Publication, Tool, Grant, and EducationalResource View tables
 - **Dataset & File Discovery** (SQL variant): lists a dataset's actual file contents, surfaces real file metadata (name/size/type), and checks public-accessibility before implying a resource is downloadable
 - **Knowledge Graph Integration** (SPARQL variant, not yet deployable): SPARQL queries against a hosted CCKP knowledge graph
@@ -60,6 +60,6 @@ To learn more about the Synapse Custom Agent framework, refer to [this internal 
 
 - Provision the `GitHubActionsCCKPChatbot` IAM OIDC role and `AWS_OIDC_ROLE_ARN` repo secret.
 - Provision an S3 bucket for Lambda deployment packages (placeholder name: `cckp-chatbot`).
-- Build a Bedrock Knowledge Base from `help.cancercomplexity.synapse.org` and set its ID as `KnowledgeBaseId` (currently `REPLACE_ME_CCKP_KB_ID` in both templates).
+- Build a Bedrock Knowledge Base from `help.cancercomplexity.synapse.org` and the MC2 Center data model docs (`mc2-center.github.io/data-models`), and set its ID as `KnowledgeBaseId` (currently `REPLACE_ME_CCKP_KB_ID` in both templates). See `benchmark/general-help/README.md` for the two crawl spiders that source this KB's content.
 - If deploying the SPARQL variant: stand up a hosted SPARQL endpoint serving `mc2-center/data-models/kg-pipeline`'s `data/rdf/cckp_kg.ttl` output, kept in sync with the pipeline's extract stage, and store its URL as the `CCKP_SPARQL_ENDPOINT` repo secret used by `deploy-copilot-sparql.yml`.
 - A Synapse Personal Access Token for the SQL variant's `SynapseAuthToken` parameter, stored as the `SYNAPSE_AUTH_TOKEN` repo secret used by `deploy-copilot-sql.yml`.

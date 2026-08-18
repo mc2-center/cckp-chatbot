@@ -10,7 +10,7 @@ The agent has two knowledge sources:
 
 | Source | Label | Description | Detection |
 |--------|-------|-------------|-----------|
-| CCKP Help Docs KB | `DOCS` | Bedrock KB built from help.cancercomplexity.synapse.org | `KNOWLEDGE_BASE` trace event or `WEB` citation |
+| CCKP Help Docs KB | `DOCS` | Bedrock KB built from help.cancercomplexity.synapse.org and the MC2 Center data model docs (mc2-center.github.io/data-models) | `KNOWLEDGE_BASE` trace event or `WEB` citation |
 | CCKP Resource Backend | `GRAPH` | SQL over Synapse View tables, or SPARQL over a knowledge graph, via action groups | `ACTION_GROUP` trace event |
 
 **This benchmark measures source routing, not answer correctness.** The primary metric is whether the agent consulted the right knowledge source — determined from Bedrock trace events — not whether the response text matches a gold answer. This is distinct from the general-help eval, which scores answer quality against known correct answers for a single-source agent. Answer quality is recorded here as a secondary metric only.

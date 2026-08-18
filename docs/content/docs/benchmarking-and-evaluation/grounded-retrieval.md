@@ -9,7 +9,7 @@ weight: 20
 
 Grounded retrieval evaluates a single knowledge source in isolation: given a question with a known correct answer, does the agent retrieve the right document and produce an answer consistent with it? This is the baseline eval every portal copilot needs — any agent with at least one docs knowledge base should have one of these, even before adding [source routing](/docs/benchmarking-and-evaluation/source-routing/) for multi-source setups.
 
-The CCKP Copilot's version of this is the **general-help benchmark** (`benchmark/general-help/`), which evaluates the docs KB built from help.cancercomplexity.synapse.org.
+The CCKP Copilot's version of this is the **general-help benchmark** (`benchmark/general-help/`), which evaluates the docs KB built from help.cancercomplexity.synapse.org and the MC2 Center data model docs (mc2-center.github.io/data-models).
 
 ## How the dataset is built
 
@@ -38,7 +38,7 @@ Although the dataset is multiple-choice, evaluation runs in **free-response** fo
 
 ## Examples from a real run
 
-No CCKP agent has been deployed yet, so there's no real eval run to draw examples from. Once `benchmark/general-help/cckpdocs_spider.py` has crawled help.cancercomplexity.synapse.org and `generate_dataset.py` has produced a human-validated question set, run `evaluate_bedrock_agent.py` against a deployed dev agent and replace this section with real results — including at least one example of a **grounded and correct** answer and one **honest gap** (the agent saying "I don't have this" rather than guessing), which is the failure mode worth normalizing rather than penalizing away.
+No CCKP agent has been deployed yet, so there's no real eval run to draw examples from. Once `benchmark/general-help/cckpdocs_spider.py` and `mc2datamodelsdocs_spider.py` have crawled both docs sources and `generate_dataset.py` has produced a human-validated question set, run `evaluate_bedrock_agent.py` against a deployed dev agent and replace this section with real results — including at least one example of a **grounded and correct** answer and one **honest gap** (the agent saying "I don't have this" rather than guessing), which is the failure mode worth normalizing rather than penalizing away.
 
 ## Running it
 

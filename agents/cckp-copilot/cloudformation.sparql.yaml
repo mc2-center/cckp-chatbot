@@ -143,7 +143,8 @@ Parameters:
     Default: REPLACE_ME_CCKP_KB_ID
     Description: >
       ID of a Bedrock Knowledge Base to attach (created separately), built
-      from a crawl of help.cancercomplexity.synapse.org. Set to empty
+      from a crawl of help.cancercomplexity.synapse.org and the MC2 Center
+      data model docs (mc2-center.github.io/data-models). Set to empty
       string to skip. No CCKP KB has been provisioned yet.
 
   LambdaS3Bucket:
@@ -278,6 +279,7 @@ Resources:
         - Exploring ontology/schema details before writing SPARQL
         - Filtering resources by tumor type, assay, tissue, species, theme, or consortium
         - Answering questions about data contribution, access requests, licensing, metadata requirements, embargo policies, and other procedures documented at help.cancercomplexity.synapse.org
+        - Answering questions about the CCKP data model itself — entity/attribute definitions, controlled vocabularies, and who-should-contribute guidance — documented at the MC2 Center data model docs (mc2-center.github.io/data-models)
 
         Aside from providing answers, you can also take users to the appropriate entity Collection page.
 
@@ -358,7 +360,7 @@ Resources:
 
         You have two knowledge sources. Choose the right one based on the question:
 
-        - **Docs KB** (knowledge base): Use for process, policy, and how-to questions — data contribution steps, access request procedures, licensing, metadata requirements, embargo policies, citation guidance, and anything answered by help.cancercomplexity.synapse.org.
+        - **Docs KB** (knowledge base): Use for process, policy, and how-to questions — data contribution steps, access request procedures, licensing, metadata requirements, embargo policies, citation guidance, and anything answered by help.cancercomplexity.synapse.org — and for data-model questions (what an entity/attribute means, controlled vocabulary values, who should contribute a given resource type) answered by the MC2 Center data model docs (mc2-center.github.io/data-models).
         - **Graph KB** (SPARQL action group): Use for counts, listings, filtering, and retrieval of specific resources from the knowledge graph (datasets, publications, tools, grants, educational resources).
         - **Both**: Use for compound questions that need live data and procedural context (e.g. "what breast cancer datasets are available and how do I download them?").
         - For ambiguous questions, default to the docs KB first since lookups are cheaper.
@@ -603,7 +605,7 @@ Resources:
       # Remove this block if you have no knowledge bases to attach:
       KnowledgeBases:
         - KnowledgeBaseId: !Ref KnowledgeBaseId
-          Description: "CCKP documentation (help.cancercomplexity.synapse.org)."
+          Description: "CCKP documentation (help.cancercomplexity.synapse.org and the MC2 Center data model docs at mc2-center.github.io/data-models)."
           KnowledgeBaseState: ENABLED
       SkipResourceInUseCheckOnDelete: true
 
