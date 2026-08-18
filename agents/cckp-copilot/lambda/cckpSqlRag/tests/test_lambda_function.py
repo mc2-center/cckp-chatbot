@@ -364,3 +364,163 @@ class TestRequest:
         from lambda_function import _request
         with pytest.raises(TimeoutError):
             _request("GET", "http://x")
+
+
+# ---------------------------------------------------------------------------
+# getDatasetFiles
+# ---------------------------------------------------------------------------
+
+class TestGetDatasetFiles:
+    @patch("lambda_function._request")
+    def test_dataset_entity_api_path(self, mock_request):
+        mock_request.return_value = (200, {
+            "concreteType": "org.sagebionetworks.repo.model.table.Dataset",
+            "items": [{"entityId": "syn111", "versionNumber": 1}],
+            "count": 1,
+            "size": 1024,
+            "checksum": "abc123",
+        })
+        event = _api_event("/dataset-files", [{"name": "id", "value": "syn999"}])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert body["type"] == "dataset"
+        assert body["items"] == [{"entityId": "syn111", "versionNumber": 1}]
+        assert body["count"] == 1
+        assert body["size"] == 1024
+        assert body["checksum"] == "abc123"
+
+    @patch("lambda_function._request")
+    def test_container_entity_function(self, mock_request):
+        mock_request.side_effect = [
+            (200, {"concreteType": "org.sagebionetworks.repo.model.Folder"}),
+            (200, {
+                "page": [{"id": "syn222", "name": "file.txt", "type": "org.sagebionetworks.repo.model.FileEntity", "versionNumber": 1}],
+                "totalChildCount": 1,
+                "sumFileSizesBytes": 2048,
+                "nextPageToken": "tok-1",
+            }),
+        ]
+        event = _function_event("getDatasetFiles", [{"name": "id", "value": "syn999"}])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert body["type"] == "container"
+        assert body["children"] == [{
+            "id": "syn222", "name": "file.txt",
+            "type": "org.sagebionetworks.repo.model.FileEntity", "versionNumber": 1,
+        }]
+        assert body["totalChildCount"] == 1
+        assert body["sumFileSizesBytes"] == 2048
+        assert body["nextPageToken"] == "tok-1"
+        # children request scoped to the entity as parentId
+        children_call = mock_request.call_args_list[1]
+        assert children_call.args[2]["parentId"] == "syn999"
+
+    @patch("lambda_function._request")
+    def test_unsupported_entity_type(self, mock_request):
+        mock_request.return_value = (200, {"concreteType": "org.sagebionetworks.repo.model.Link"})
+        event = _function_event("getDatasetFiles", [{"name": "id", "value": "syn999"}])
+        resp = lambda_handler(event, None)
+        assert "not a Dataset or container" in _body(resp)["error"]
+
+    @patch("lambda_function._request")
+    def test_entity_fetch_failure(self, mock_request):
+        mock_request.return_value = (404, {"reason": "not found"})
+        event = _function_event("getDatasetFiles", [{"name": "id", "value": "syn999"}])
+        resp = lambda_handler(event, None)
+        assert "Failed to fetch entity" in _body(resp)["error"]
+
+    def test_missing_id(self):
+        resp = lambda_handler(_function_event("getDatasetFiles"), None)
+        assert _body(resp) == {"error": "id is required"}
+
+
+# ---------------------------------------------------------------------------
+# getFileDetails
+# ---------------------------------------------------------------------------
+
+class TestGetFileDetails:
+    @patch("lambda_function._request")
+    def test_success_api_path(self, mock_request):
+        mock_request.return_value = (200, {"list": [
+            {"id": "fh1", "fileName": "a.txt", "contentSize": 10, "contentType": "text/plain", "contentMd5": "abc"},
+        ]})
+        event = _api_event("/file-details", [{"name": "id", "value": "syn222"}])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert body["id"] == "syn222"
+        assert body["files"] == [{
+            "fileHandleId": "fh1", "fileName": "a.txt",
+            "contentSize": 10, "contentType": "text/plain", "contentMd5": "abc",
+        }]
+
+    @patch("lambda_function._request")
+    def test_success_with_version_function(self, mock_request):
+        mock_request.return_value = (200, {"list": []})
+        event = _function_event("getFileDetails", [
+            {"name": "id", "value": "syn222"},
+            {"name": "versionNumber", "value": "3"},
+        ])
+        resp = lambda_handler(event, None)
+        assert _body(resp)["files"] == []
+        called_url = mock_request.call_args.args[1]
+        assert "/version/3/filehandles" in called_url
+
+    @patch("lambda_function._request")
+    def test_fetch_failure(self, mock_request):
+        mock_request.return_value = (500, {"reason": "server error"})
+        event = _function_event("getFileDetails", [{"name": "id", "value": "syn222"}])
+        resp = lambda_handler(event, None)
+        assert "Failed to fetch file handles" in _body(resp)["error"]
+
+    def test_missing_id(self):
+        resp = lambda_handler(_function_event("getFileDetails"), None)
+        assert _body(resp) == {"error": "id is required"}
+
+
+# ---------------------------------------------------------------------------
+# checkRestriction
+# ---------------------------------------------------------------------------
+
+class TestCheckRestriction:
+    @patch("lambda_function._request")
+    def test_success_api_path(self, mock_request):
+        mock_request.return_value = (200, {"restrictionInformation": [
+            {"objectId": "syn999", "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False},
+        ]})
+        event = _api_event("/check-restriction", [{"name": "ids", "value": ["syn999"]}])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert body["restrictions"]["syn999"] == {
+            "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False,
+        }
+
+    @patch("lambda_function._request")
+    def test_comma_separated_string_ids_function(self, mock_request):
+        mock_request.return_value = (200, {"restrictionInformation": [
+            {"objectId": "syn1", "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False},
+            {"objectId": "syn2", "restrictionLevel": "CONTROLLED_BY_ACT", "hasUnmetAccessRequirement": True},
+        ]})
+        event = _function_event("checkRestriction", [{"name": "ids", "value": "syn1, syn2"}])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert set(body["restrictions"]) == {"syn1", "syn2"}
+        sent_body = mock_request.call_args.args[2]
+        assert sent_body == {"restrictableObjectType": "ENTITY", "objectIds": ["syn1", "syn2"]}
+
+    def test_too_many_ids(self):
+        event = _function_event("checkRestriction", [
+            {"name": "ids", "value": [f"syn{i}" for i in range(51)]},
+        ])
+        resp = lambda_handler(event, None)
+        assert "at most 50 ids" in _body(resp)["error"]
+
+    @patch("lambda_function._request")
+    def test_fetch_failure(self, mock_request):
+        mock_request.return_value = (500, {"reason": "server error"})
+        event = _function_event("checkRestriction", [{"name": "ids", "value": ["syn999"]}])
+        resp = lambda_handler(event, None)
+        assert "Failed to check restriction info" in _body(resp)["error"]
+
+    def test_missing_ids(self):
+        resp = lambda_handler(_function_event("checkRestriction"), None)
+        assert _body(resp) == {"error": "ids is required"}

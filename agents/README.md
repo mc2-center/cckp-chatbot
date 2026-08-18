@@ -26,6 +26,7 @@ No agent has been deployed yet, so there are no real Agent IDs to record here â€
 
 - **Help Docs QA**: Answers process, policy, and how-to questions from the CCKP documentation (help.cancercomplexity.synapse.org)
 - **Resource Search** (SQL variant): SQL queries against the CCKP's Dataset, Publication, Tool, Grant, and EducationalResource View tables
+- **Dataset & File Discovery** (SQL variant): lists a dataset's actual file contents, surfaces real file metadata (name/size/type), and checks public-accessibility before implying a resource is downloadable
 - **Knowledge Graph Integration** (SPARQL variant, not yet deployable): SPARQL queries against a hosted CCKP knowledge graph
 - **Portal Navigation**: Redirects users to filtered Explore pages (datasets, publications, tools, grants, educational resources)
 - **Guided Prompts**: Interactive follow-up suggestions

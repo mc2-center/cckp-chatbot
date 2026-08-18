@@ -3,14 +3,18 @@ info:
   title: CCKP SQL Function API
   version: 1.0.0
   description: >
-    This schema describes the three agent-facing functions for querying the
-    Cancer Complexity Knowledge Portal (CCKP)'s curated Synapse View tables
-    directly via SQL (no knowledge graph / SPARQL endpoint required). A
-    Lambda adapter maps these operations to Bedrock action-group style
-    function calls via apiPath or function name.
+    This schema describes the agent-facing functions for querying the Cancer
+    Complexity Knowledge Portal (CCKP)'s curated Synapse View tables directly
+    via SQL (no knowledge graph / SPARQL endpoint required), plus dataset and
+    file discovery helpers that resolve a dataset's underlying Synapse entity
+    to its actual file contents and accessibility. A Lambda adapter maps
+    these operations to Bedrock action-group style function calls via apiPath
+    or function name.
 tags:
   - name: sql
     description: SQL query and introspection operations over the CCKP View tables
+  - name: discovery
+    description: Dataset and file discovery operations against the Synapse REST API
 paths:
   /sql-query:
     post:
@@ -85,6 +89,89 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CountByTypeResponse"
+  /dataset-files:
+    post:
+      tags:
+        - discovery
+      operationId: getDatasetFiles
+      summary: List the file contents of a dataset's underlying Synapse entity
+      description: >
+        Resolves a Synapse entity id (e.g. a datasets row's downloadSynId) to
+        its file contents. If the entity is a first-class Synapse Dataset,
+        returns its curated item list directly. If it's a Folder/Project
+        container, lists its file/folder children instead. Call getColumns
+        or a sqlQuery first to find a row's downloadSynId before calling this.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetDatasetFilesRequest"
+            examples:
+              example:
+                value:
+                  id: syn12345678
+      responses:
+        "200":
+          description: Dataset item list, container children, or an application-level error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetDatasetFilesResponse"
+  /file-details:
+    post:
+      tags:
+        - discovery
+      operationId: getFileDetails
+      summary: Get real file metadata (name/size/type/checksum) for a file entity
+      description: >
+        Returns the actual FileHandle metadata for a file entity id, typically
+        one surfaced by getDatasetFiles. A bare entity fetch only exposes a
+        file handle reference, not the file's real name/size/type.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetFileDetailsRequest"
+            examples:
+              example:
+                value:
+                  id: syn87654321
+      responses:
+        "200":
+          description: File metadata or an application-level error payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetFileDetailsResponse"
+  /check-restriction:
+    post:
+      tags:
+        - discovery
+      operationId: checkRestriction
+      summary: Check whether datasets/files are actually publicly accessible
+      description: >
+        Must be called before telling a user a dataset or file is
+        downloadable — CCKP is a public-data-only, read-only portal, and not
+        every entity has restrictionLevel OPEN. Accepts up to 50 ids per call.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckRestrictionRequest"
+            examples:
+              example:
+                value:
+                  ids: ["syn12345678", "syn87654321"]
+      responses:
+        "200":
+          description: Per-id restriction level, or an application-level error payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckRestrictionResponse"
 components:
   schemas:
     SqlQueryRequest:
@@ -157,4 +244,102 @@ components:
         errors:
           type: object
           description: Map of table alias to error text, present only on partial failure.
+      additionalProperties: false
+    GetDatasetFilesRequest:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: >
+            Raw Synapse entity id backing a dataset row (e.g. its
+            downloadSynId), not one of the 5 View table ids.
+      additionalProperties: false
+    GetDatasetFilesResponse:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Either "dataset" (a first-class Synapse Dataset) or "container" (a Folder/Project).
+        items:
+          type: array
+          items:
+            type: object
+          description: Present when type=dataset. Flat list of {entityId, versionNumber} file references.
+        count:
+          type: integer
+          description: Present when type=dataset. Number of items.
+        size:
+          type: integer
+          description: Present when type=dataset. Cumulative bytes of all items.
+        checksum:
+          type: string
+          description: Present when type=dataset. Server-computed checksum.
+        children:
+          type: array
+          items:
+            type: object
+          description: Present when type=container. List of {id, name, type, versionNumber}.
+        totalChildCount:
+          type: integer
+          description: Present when type=container.
+        sumFileSizesBytes:
+          type: integer
+          description: Present when type=container.
+        nextPageToken:
+          type: string
+          description: Present when type=container and more children exist beyond this page.
+        error:
+          type: string
+          description: Application-level error text returned by the function.
+      additionalProperties: false
+    GetFileDetailsRequest:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Synapse file entity id, typically one surfaced by getDatasetFiles.
+        versionNumber:
+          type: integer
+          description: Optional specific version to fetch file handles for.
+      additionalProperties: false
+    GetFileDetailsResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        files:
+          type: array
+          items:
+            type: object
+          description: List of {fileHandleId, fileName, contentSize, contentType, contentMd5}.
+        error:
+          type: string
+          description: Application-level error text returned by the function.
+      additionalProperties: false
+    CheckRestrictionRequest:
+      type: object
+      required:
+        - ids
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+          description: Up to 50 raw Synapse entity ids (datasets and/or files) to check.
+      additionalProperties: false
+    CheckRestrictionResponse:
+      type: object
+      properties:
+        restrictions:
+          type: object
+          description: >
+            Map of entity id to {restrictionLevel: OPEN|RESTRICTED_BY_TERMS_OF_USE|CONTROLLED_BY_ACT,
+            hasUnmetAccessRequirement}.
+        error:
+          type: string
+          description: Application-level error text returned by the function.
       additionalProperties: false

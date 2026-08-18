@@ -46,13 +46,16 @@ aws cloudformation deploy \
 
 ### Lambda functions
 
-`agents/cckp-copilot/lambda/cckpSqlRag/lambda_function.py` exposes three operations for the SQL backend:
+`agents/cckp-copilot/lambda/cckpSqlRag/lambda_function.py` exposes six operations for the SQL backend — three for querying the curated tables, three for dataset & file discovery against the wider Synapse REST API:
 
 | Function | Purpose |
 |---|---|
 | `sqlQuery` | Run SQL against one named table (datasets, publications, tools, grants, education, or a raw synId) |
 | `getColumns` | List a table's exact deployed column names |
 | `countByType` | Row counts across all 5 tables |
+| `getDatasetFiles` | List the file contents of a dataset's underlying Synapse entity (a first-class Dataset's item list, or a Folder/Project's children) |
+| `getFileDetails` | Get a specific file's real name/size/type/checksum |
+| `checkRestriction` | Check whether datasets/files are actually publicly accessible before offering them for download |
 
 `agents/cckp-copilot/lambda/cckpGraphRag/lambda_function.py` exposes four operations for the SPARQL backend (only usable once a hosted endpoint exists):
 

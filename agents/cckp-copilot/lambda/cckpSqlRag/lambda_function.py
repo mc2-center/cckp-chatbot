@@ -36,6 +36,15 @@ PART_SELECT_COLUMNS = 0x4
 DEFAULT_LIMIT = 25
 MAX_LIMIT = 200
 
+# concreteType values relevant to dataset/file discovery
+DATASET_CONCRETE_TYPE = "org.sagebionetworks.repo.model.table.Dataset"
+CONTAINER_CONCRETE_TYPES = {
+    "org.sagebionetworks.repo.model.Folder",
+    "org.sagebionetworks.repo.model.Project",
+}
+
+MAX_RESTRICTION_IDS = 50
+
 
 def _make_response(action_group, api_path, http_method, http_status, body):
     """Build a Bedrock action-group response that is always JSON-serializable."""
@@ -86,6 +95,12 @@ def lambda_handler(event, context):
             response_body = get_columns_fn(params)
         elif function == "countByType":
             response_body = count_by_type(params)
+        elif function == "getDatasetFiles":
+            response_body = get_dataset_files(params)
+        elif function == "getFileDetails":
+            response_body = get_file_details(params)
+        elif function == "checkRestriction":
+            response_body = check_restriction(params)
         else:
             response_body = {
                 "error": f"Unknown function: {function}",
@@ -117,6 +132,9 @@ def map_api_path_to_function(api_path: str) -> Optional[str]:
         "/sql-query": "sqlQuery",
         "/columns": "getColumns",
         "/count-by-type": "countByType",
+        "/dataset-files": "getDatasetFiles",
+        "/file-details": "getFileDetails",
+        "/check-restriction": "checkRestriction",
     }
     return mapping.get(api_path)
 
@@ -269,3 +287,136 @@ def count_by_type(params: Dict[str, Any]) -> Dict[str, Any]:
     if errors:
         result["errors"] = errors
     return result
+
+
+def get_dataset_files(params: Dict[str, Any]) -> Dict[str, Any]:
+    """List the file contents of a Synapse entity backing a CCKP dataset row
+    (e.g. a DatasetView row's `downloadSynId`).
+
+    The entity may be a first-class Synapse Dataset (a curated flat list of
+    file references, already embedded in its own JSON body) or a plain
+    Folder/Project container (whose children must be listed separately).
+    """
+    entity_id = params.get("id")
+    if not entity_id:
+        return {"error": "id is required"}
+
+    status, entity = _request("GET", f"{SYNAPSE_BASE_URL}/repo/v1/entity/{entity_id}")
+    if status not in (200, 201):
+        return {"error": f"Failed to fetch entity {entity_id} (HTTP {status}): {entity}"}
+
+    concrete_type = entity.get("concreteType", "")
+
+    if concrete_type == DATASET_CONCRETE_TYPE:
+        return {
+            "type": "dataset",
+            "items": entity.get("items", []),
+            "count": entity.get("count"),
+            "size": entity.get("size"),
+            "checksum": entity.get("checksum"),
+        }
+
+    if concrete_type in CONTAINER_CONCRETE_TYPES:
+        body = {
+            "parentId": entity_id,
+            "includeTypes": ["file", "folder"],
+            "includeTotalChildCount": True,
+            "includeSumFileSizes": True,
+        }
+        status, resp = _request(
+            "POST", f"{SYNAPSE_BASE_URL}/repo/v1/entity/children", body
+        )
+        if status not in (200, 201):
+            return {"error": f"Failed to list children of {entity_id} (HTTP {status}): {resp}"}
+
+        children = [
+            {
+                "id": c.get("id"),
+                "name": c.get("name"),
+                "type": c.get("type"),
+                "versionNumber": c.get("versionNumber"),
+            }
+            for c in resp.get("page", [])
+        ]
+        result = {
+            "type": "container",
+            "children": children,
+            "totalChildCount": resp.get("totalChildCount"),
+            "sumFileSizesBytes": resp.get("sumFileSizesBytes"),
+        }
+        if resp.get("nextPageToken"):
+            result["nextPageToken"] = resp["nextPageToken"]
+        return result
+
+    return {
+        "error": (
+            f"Entity {entity_id} is a {concrete_type or 'unknown type'}, "
+            "not a Dataset or container — no file contents to list."
+        )
+    }
+
+
+def get_file_details(params: Dict[str, Any]) -> Dict[str, Any]:
+    """Return real file metadata (name/size/type/checksum) for a file entity.
+
+    A bare entity fetch only returns a dataFileHandleId reference; the actual
+    file metadata lives on the FileHandle(s) associated with the entity.
+    """
+    entity_id = params.get("id")
+    if not entity_id:
+        return {"error": "id is required"}
+
+    version = params.get("versionNumber")
+    if version:
+        url = f"{SYNAPSE_BASE_URL}/repo/v1/entity/{entity_id}/version/{version}/filehandles"
+    else:
+        url = f"{SYNAPSE_BASE_URL}/repo/v1/entity/{entity_id}/filehandles"
+
+    status, resp = _request("GET", url)
+    if status not in (200, 201):
+        return {"error": f"Failed to fetch file handles for {entity_id} (HTTP {status}): {resp}"}
+
+    handles = resp.get("list", []) if isinstance(resp, dict) else []
+    files = [
+        {
+            "fileHandleId": h.get("id"),
+            "fileName": h.get("fileName"),
+            "contentSize": h.get("contentSize"),
+            "contentType": h.get("contentType"),
+            "contentMd5": h.get("contentMd5"),
+        }
+        for h in handles
+    ]
+    return {"id": entity_id, "files": files}
+
+
+def check_restriction(params: Dict[str, Any]) -> Dict[str, Any]:
+    """Check whether datasets/files are actually publicly accessible.
+
+    Must be called before telling a user a resource is downloadable — CCKP is
+    a public-data-only, read-only portal, and not every entity is OPEN.
+    """
+    ids = params.get("ids")
+    if not ids:
+        return {"error": "ids is required"}
+
+    if isinstance(ids, str):
+        ids = [i.strip() for i in ids.split(",") if i.strip()]
+
+    if len(ids) > MAX_RESTRICTION_IDS:
+        return {"error": f"at most {MAX_RESTRICTION_IDS} ids allowed per call"}
+
+    body = {"restrictableObjectType": "ENTITY", "objectIds": ids}
+    status, resp = _request(
+        "POST", f"{SYNAPSE_BASE_URL}/repo/v1/restrictionInformation/batch", body
+    )
+    if status not in (200, 201):
+        return {"error": f"Failed to check restriction info (HTTP {status}): {resp}"}
+
+    restrictions = {}
+    for item in resp.get("restrictionInformation", []):
+        restrictions[str(item.get("objectId"))] = {
+            "restrictionLevel": item.get("restrictionLevel"),
+            "hasUnmetAccessRequirement": item.get("hasUnmetAccessRequirement"),
+        }
+    return {"restrictions": restrictions}
