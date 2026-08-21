@@ -20,7 +20,8 @@ No agent has been deployed yet, so there are no real Agent IDs to record here â€
 
 | Agent | Registration | Registered by | Notes |
 |---|---|---|---|
-| _(none yet)_ | | | Register the prod agent with Synapse once deployed, following the [Synapse Custom Agent framework](https://sagebionetworks.jira.com/wiki/spaces/PLFM/pages/3711303683/Adding+Custom+Agents+to+Synapse) (internal Confluence). Dev agents are typically tested internally and not registered. |
+| Cephy-sql-alpha-dev | 336 | @Bankso | Dev/staging agent for the CCKP |
+| Cephy-sql-alpha | 335 | @Bankso | Prod agent for the CCKP |
 
 ## Copilot Capabilities
 
@@ -33,7 +34,7 @@ No agent has been deployed yet, so there are no real Agent IDs to record here â€
 
 See [CHANGELOG](CHANGELOG.md) for release history.
 
-## CI/CD
+## CI/CD (Not active)
 
 Changes under `agents/cckp-copilot/` trigger deploy workflows in `.github/workflows/`:
 
@@ -52,14 +53,40 @@ The workflow detects what changed and only runs the needed steps:
 
 AWS credentials use GitHub OIDC via an IAM role, stored as the `AWS_OIDC_ROLE_ARN` repo secret. **No such role has been provisioned yet** â€” an AWS admin needs to create one scoped to this repo (e.g. named `GitHubActionsCCKPChatbot`, mirroring the NF Portal Copilot's role) before these workflows will succeed.
 
+## Manual deployment
+Stacks and agents can be deployed from CLI, using the cloudformation templates and commands from GitHub workflows. 
+
+Note: This requires access to the ADMIN role 
+
+### Add new or updated Lambda (Dev SQL RAG example)
+```
+cd cckp-chatbot/agents/cckp-copilot/lambda/cckpSqlRag
+
+mkdir tmp
+
+zip tmp/cckpSqlRag.zip lambda_function.py
+
+aws s3 cp tmp/cckpSqlRag.zip "s3://cckp-chatbot/lambda/cckpSqlRag.zip"
+
+aws lambda update-function-code \
+    --function-name Cephy-sql-alpha-dev-sqlrag \
+    --s3-bucket cckp-chatbot \
+    --s3-key lambda/cckpSqlRag.zip
+```
+
+### Create or deploy stack and agent (Dev SQL RAG example)
+```
+aws cloudformation deploy \
+	--template-file cloudformation.sql.yaml \
+	--stack-name obanks-cckp-search-agent-8-21-2026-dev \
+	--capabilities CAPABILITY_NAMED_IAM
+```
+
 ## Setup
 
 To learn more about the Synapse Custom Agent framework, refer to [this internal Confluence doc](https://sagebionetworks.jira.com/wiki/spaces/PLFM/pages/3711303683/Adding+Custom+Agents+to+Synapse).
 
-## Open items before first deploy
+## Open items
 
 - Provision the `GitHubActionsCCKPChatbot` IAM OIDC role and `AWS_OIDC_ROLE_ARN` repo secret.
-- Provision an S3 bucket for Lambda deployment packages (placeholder name: `cckp-chatbot`).
-- Build a Bedrock Knowledge Base from `help.cancercomplexity.synapse.org` and the MC2 Center data model docs (`mc2-center.github.io/data-models`), and set its ID as `KnowledgeBaseId` (currently `REPLACE_ME_CCKP_KB_ID` in both templates). See `benchmark/general-help/README.md` for the two crawl spiders that source this KB's content.
-- If deploying the SPARQL variant: stand up a hosted SPARQL endpoint serving `mc2-center/data-models/kg-pipeline`'s `data/rdf/cckp_kg.ttl` output, kept in sync with the pipeline's extract stage, and store its URL as the `CCKP_SPARQL_ENDPOINT` repo secret used by `deploy-copilot-sparql.yml`.
-- A Synapse Personal Access Token for the SQL variant's `SynapseAuthToken` parameter, stored as the `SYNAPSE_AUTH_TOKEN` repo secret used by `deploy-copilot-sql.yml`.
+- stand up a hosted SPARQL endpoint serving `mc2-center/data-models/kg-pipeline`'s `data/rdf/cckp_kg.ttl` output, kept in sync with the pipeline's extract stage, and store its URL as the `CCKP_SPARQL_ENDPOINT` repo secret used by `deploy-copilot-sparql.yml`.
