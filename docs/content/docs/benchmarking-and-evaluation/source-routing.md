@@ -12,7 +12,7 @@ weight: 30
 
 Source routing tests whether the agent efficiently consults the **correct** knowledge source for a given question. The agent has to be a good orchestrator, recognizing which is the best source to utitilize without unnecessary diversions that add time and money costs. Aside from the underlying model intelligence, the system may include routing rules in the system prompt (or other methods, depending on the framework) that influence overall performance; this benchmark is how to validate and iterate whether the overall system is working sufficiently well.
 
-The NF Portal Copilot has two sources — a documentation KB and a SPARQL-backed knowledge graph — so it needs this eval in addition to [grounded retrieval](/docs/benchmarking-and-evaluation/grounded-retrieval/) on each source individually. The **kb-routing benchmark** (`benchmark/kb-routing/`) covers this.
+The CCKP Copilot has two sources — a documentation KB and a resource backend (SQL over Synapse View tables, or SPARQL over a knowledge graph) — so it needs this eval in addition to [grounded retrieval](/docs/benchmarking-and-evaluation/grounded-retrieval/) on each source individually. The **kb-routing benchmark** (`benchmark/kb-routing/`) covers this.
 
 ## How the dataset is built
 
@@ -21,7 +21,7 @@ The NF Portal Copilot has two sources — a documentation KB and a SPARQL-backed
 | `expected` value | Meaning |
 |---|---|
 | `DOCS` | Documentation KB (process, policy, how-tos) |
-| `GRAPH` | SPARQL action groups (counts, lists, specific records) |
+| `GRAPH` | Resource-backend action groups (counts, lists, specific records) |
 | `BOTH` | Either source is acceptable, or both are needed for a compound question |
 | `REDIRECT` | A navigation redirect, no KB lookup needed |
 | `NONE` | No lookup expected — general knowledge or decline |
@@ -30,21 +30,7 @@ Sessions cover each source individually, mixed-source conversations where the us
 
 ## Example from a real run
 
-Drawn from a 38-turn run (`routing_eval_results_20260626T181035Z.json`). Overall routing accuracy that run: **36/38 (95%)**.
-
-A single session pivoting between sources — this is exactly the case this benchmark exists to catch:
-
-**Turn 1** — "How long is the standard data embargo period on the portal?" (expected: `DOCS`)
-
-> "The standard data embargo period on the NF Portal is **12-18 months**, though this can vary by funder..."
-
-Routed to `DOCS`. Score: **2/2** (correct and efficient).
-
-**Turn 2**, same session — "How many studies have released data?" (expected: `GRAPH`)
-
-> "**87 studies** on the NF Portal have released data (with 'Available' status)..."
-
-Routed to `GRAPH`. Score: **2/2**. The agent correctly re-routed mid-session from a policy question to a live-data-count question, rather than sticking with whichever source it used for turn 1 — the failure mode this benchmark is designed to surface.
+No CCKP agent has been deployed yet, so there's no real routing run to draw an example from. Once a dev agent exists, run `evaluate_kb_routing.py` and replace this section with a real example — ideally one session that pivots between sources mid-conversation (e.g. a policy question followed by a live-data-count question), since that's the failure mode this benchmark exists to catch.
 
 ## Scoring
 

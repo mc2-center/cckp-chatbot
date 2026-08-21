@@ -1,12 +1,12 @@
-# NF Portal Copilot Docs
+# CCKP Copilot Docs
 
 Hugo + [hugo-book](https://themes.gohugo.io/themes/hugo-book/) docs site.
 
 ## Local development
 
 ```sh
-git clone --recurse-submodules https://github.com/nf-osi/portal-chatbot.git
-cd portal-chatbot/docs
+git clone --recurse-submodules https://github.com/mc2-center/cckp-chatbot.git
+cd cckp-chatbot/docs
 hugo server
 ```
 
@@ -25,4 +25,4 @@ hugo --minify   # outputs to docs/public/, not committed
 
 ## CI / GitHub Pages
 
-`.github/workflows/deploy-docs.yml` checks out the repo (with submodules), installs Hugo, and builds. The site is served at `https://nf-osi.github.io/portal-chatbot/`, hence `baseURL` in `hugo.toml`.
+`.github/workflows/deploy-docs.yml` checks out the repo (with submodules), installs Hugo, and builds. The site is served at `https://mc2-center.github.io/cckp-chatbot/`, hence `baseURL` in `hugo.toml`.

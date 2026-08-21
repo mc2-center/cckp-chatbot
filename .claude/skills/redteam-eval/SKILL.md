@@ -1,13 +1,15 @@
 ---
 name: redteam-eval
-description: Run the NF Portal copilot adversarial redteam experiment and refresh docs/content/docs/benchmarking-and-evaluation/red-team-report.md (use when user indicates updated report needed, such as upon changes to the benchmark, or agent's model or instructions)
+description: Run the CCKP Copilot adversarial redteam experiment and refresh docs/content/docs/benchmarking-and-evaluation/red-team-report.md (use when user indicates updated report needed, such as upon changes to the benchmark, or agent's model or instructions)
 ---
 
-You run `benchmark/redteam/evaluate_redteam.py` against the live dev Bedrock agent and refresh the aggregate report at `docs/content/docs/benchmarking-and-evaluation/red-team-report.md`. This is a **live adversarial test against a real Bedrock Agent** — confirm scope with the user before running (which vulnerabilities, how many runs, which models) since each run takes ~15-25 min and makes real Bedrock calls.
+You run `benchmark/redteam/evaluate_redteam.py` against a live dev Bedrock agent and refresh the aggregate report at `docs/content/docs/benchmarking-and-evaluation/red-team-report.md`. This is a **live adversarial test against a real Bedrock Agent** — confirm scope with the user before running (which vulnerabilities, how many runs, which models) since each run takes ~15-25 min and makes real Bedrock calls.
+
+**No CCKP agent has been deployed yet.** Before running this skill, get the dev agent's ID from the user (or `agents/README.md` once a stack exists) — `evaluate_redteam.py --agent-id` has no default and is a required flag.
 
 ## Background
 
-Read `benchmark/redteam/README.md` for the full harness design and any previous artifacts such as `docs/content/docs/benchmarking-and-evaluation/red-team-report.md` for the last run's findings and known limitations. In short: an attacker LLM crafts adversarial messages against the dev agent (`ERAAPKTD4Q` / `TSTALIASID`), a judge LLM scores whether each attack succeeded, and results are saved to `benchmark/redteam/redteam_eval_results_<timestamp>.json`. **Never target the prod agent id (`R7WZ38JGKX`)** — the harness itself refuses this without `--allow-prod`.
+Read `benchmark/redteam/README.md` for the full harness design and any previous artifacts such as `docs/content/docs/benchmarking-and-evaluation/red-team-report.md` for the last run's findings and known limitations. In short: an attacker LLM crafts adversarial messages against the dev agent (`--agent-id` / `TSTALIASID`), a judge LLM scores whether each attack succeeded, and results are saved to `benchmark/redteam/redteam_eval_results_<timestamp>.json`. **Never target the prod agent id** (`PROD_AGENT_ID` in `evaluate_redteam.py` — a placeholder until a CCKP prod agent exists) — the harness itself refuses this without `--allow-prod`.
 
 ## Known environment gotcha
 
@@ -31,7 +33,7 @@ If a run comes back with every case showing `NO VERDICT [degraded]: NO_TURNS_COM
 2. **Run the eval** (one invocation per attacker/judge pairing), from `benchmark/redteam/`:
    ```bash
    env -u AWS_BEARER_TOKEN_BEDROCK python3 evaluate_redteam.py \
-     --attacker-model <id> --judge-model <id>
+     --agent-id <dev-agent-id> --attacker-model <id> --judge-model <id>
    ```
    Add `--vulnerability <id>` to scope to one item. Each full-suite run (~27 cases) takes roughly 15-25 minutes — run in the background and keep working while it completes. Do NOT run more than one against the same session concurrently is fine (independent sessions), but be mindful of Bedrock rate limits if launching many in parallel.
 
@@ -47,7 +49,7 @@ If a run comes back with every case showing `NO VERDICT [degraded]: NO_TURNS_COM
 5. **Review the successful-attack transcripts** in each new result file (`results[].attack_succeeded == true`) before writing anything up — read the actual `turns` transcript and judge `reason`, don't just report the rate.
 
 6. **Revise `docs/content/docs/benchmarking-and-evaluation/red-team-report.md`** from the new aggregate output plus your review of any successful attacks. Expected structure:
-   - Title: `# NF Portal Copilot Red Team — Latest Report`
+   - Title: `# CCKP Copilot Red Team — Latest Report`
    - Background section: Context about the scope and purpose of the redteam eval, which **can stay the same** unless user specifies updates needed.
    - Methodology section: Concise summary explaining vulnerability and attack taxonomy covered, table of runs included (timestamp, attacker model, judge model, n cases), reference to relevant scripts. 
    - Results section: Headline aggregate attack success rate (mean ± std across runs), per-vulnerability / per-category / per-technique breakdown with mean/std and pooled counts. Full detail on every distinct successful attack found across all runs (dedupe if the same failure mode recurs across runs, analyze whether recurrence is a consistent weakness or chance).

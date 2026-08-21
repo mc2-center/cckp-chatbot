@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evaluate KB source routing for the NF Portal multi-source Bedrock Agent.
+"""Evaluate KB source routing for the CCKP Copilot multi-source Bedrock Agent.
 
 Invokes the agent with each turn in each session (reusing session IDs across
 turns), captures Bedrock trace events to detect which KB source was used
@@ -7,12 +7,13 @@ turns), captures Bedrock trace events to detect which KB source was used
 accuracy alongside answer quality metrics.
 
 Usage:
-    python evaluate_kb_routing.py                          # routing only (~8 min for 34 turns)
-    python evaluate_kb_routing.py --judge                  # also run LLM judge for answer quality
-    python evaluate_kb_routing.py -n 3                     # quick test: first 3 sessions only
-    python evaluate_kb_routing.py --session s-docs-single-01  # run one specific session
-    python evaluate_kb_routing.py --agent-id ERAAPKTD4Q   # test a different agent
-    python evaluate_kb_routing.py --profile my-profile
+    python evaluate_kb_routing.py --agent-id ABC123        # routing only
+    python evaluate_kb_routing.py --agent-id ABC123 --judge  # also run LLM judge for answer quality
+    python evaluate_kb_routing.py --agent-id ABC123 -n 3   # quick test: first 3 sessions only
+    python evaluate_kb_routing.py --agent-id ABC123 --session s-docs-single-01  # one session
+    python evaluate_kb_routing.py --agent-id ABC123 --profile my-profile
+
+No CCKP agent has been deployed yet, so --agent-id has no default.
 
 The default alias TSTALIASID always points to the DRAFT version. If you've
 updated the agent (instructions, model, action groups) without preparing it,
@@ -194,13 +195,13 @@ def judge_answer(
     """
     source_hint = {
         "DOCS": "documentation/process/policy information",
-        "GRAPH": "specific data counts, lists, or records from the NF portal knowledge graph",
+        "GRAPH": "specific data counts, lists, or records from the CCKP resource backend",
         "BOTH": "a combination of documentation guidance and specific portal data",
         "REDIRECT": "a redirect action navigating the user to the appropriate portal page",
     }.get(expected, "relevant information")
 
     prompt = (
-        "You are evaluating an AI assistant's response for the NF Data Portal.\n\n"
+        "You are evaluating an AI assistant's response for the Cancer Complexity Knowledge Portal (CCKP).\n\n"
         f"User question: {question}\n\n"
         f"Expected answer type: {source_hint}\n\n"
         f"Assistant's response: {agent_response}\n\n"
@@ -453,12 +454,12 @@ def run_evaluation(args: argparse.Namespace) -> None:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Evaluate KB source routing for the NF Portal multi-source Bedrock Agent.",
+        description="Evaluate KB source routing for the CCKP Copilot multi-source Bedrock Agent.",
     )
     parser.add_argument(
         "--agent-id",
-        default="ERAAPKTD4Q",
-        help="Bedrock Agent ID (default: %(default)s)",
+        required=True,
+        help="Bedrock Agent ID (no default — no CCKP agent has been deployed yet)",
     )
     parser.add_argument(
         "--alias-id",

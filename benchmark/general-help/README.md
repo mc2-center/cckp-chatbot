@@ -1,12 +1,19 @@
 # General Help Benchmark
 
-This benchmark is used for quality assurance of the deployed NF portal chatbot. Multiple-choice questions are synthetically generated from the live NF help documentation, then validated by human reviewers before being used for evaluation.
+This benchmark is used for quality assurance of a deployed CCKP Copilot. Multiple-choice questions are synthetically generated from the CCKP's documentation sources, then validated by human reviewers before being used for evaluation.
+
+> **Status:** this benchmark was forked from the NF Portal Copilot's general-help benchmark. The NF-specific dataset (`help_qa_dataset_anthropic.json`), eval results, and `reviewer_notes.yml` have been removed — they encoded NF Data Portal policy answers (licensing, embargo, file-size limits) that do not apply to CCKP and would be actively misleading if kept. Regenerate them from a real crawl of CCKP's docs (Steps 1–3 below) before running an eval.
 
 ---
 
-## Step 1: Crawl the NF help docs
+## Step 1: Crawl the docs sources
 
-The Scrapy spider (`nfdocs_spider.py`) crawls all pages under the [public NF help docs](https://help.nf.synapse.org/nf-data-portal-documentation) and converts each page into a Markdown file saved under `output_markdown/` (git-ignored).
+The CCKP Copilot's docs KB is built from **two** sources, each with its own Scrapy spider. Both write into the same `output_markdown/` (git-ignored), with filenames prefixed by source so they don't collide.
+
+| Source | Spider | Covers |
+|---|---|---|
+| [CCKP help docs](https://help.cancercomplexity.synapse.org) | `cckpdocs_spider.py` | Portal process/policy/how-to content: data contribution, access requests, licensing, embargo policies |
+| [MC2 Center data model docs](https://mc2-center.github.io/data-models/) | `mc2datamodelsdocs_spider.py` | Data model reference: entity/attribute definitions, controlled vocabularies, "why/who should contribute" guidance per entity type |
 
 #### Requirements
 
@@ -18,16 +25,19 @@ pip install scrapy markdownify
 
 ```bash
 cd benchmark/general-help
-scrapy runspider nfdocs_spider.py
+scrapy runspider cckpdocs_spider.py
+scrapy runspider mc2datamodelsdocs_spider.py
 ```
 
-Verify that `output_markdown/` was created and contains `.md` files — one per documentation page.
+Verify that `output_markdown/` was created and contains `.md` files — one per documentation page, prefixed `cckp_` or `datamodels_` by source.
 
 ---
 
 ## Step 2: Generate the synthetic dataset
 
 `generate_dataset.py` reads the crawled Markdown files, builds a prompt, and calls the selected LLM provider using structured output to enforce the `qa_schema.json` format. Each question is assigned a UUID after generation (not by the model).
+
+> **Claude Code users:** the `generate-help-qa-dataset` skill (`.claude/skills/generate-help-qa-dataset/`) runs this step for you, including a Claude-native mode that needs no `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` — Claude generates each batch's questions itself while reusing this script's own batching/prompt/schema/ID-assignment code, so the output is identical in format to a scripted run. Invoke it with a prompt like "generate the help QA dataset" or "run step 2 of the general-help benchmark." The manual CLI steps below still work if you'd rather call the OpenAI/Anthropic API directly.
 
 ### Providers
 
@@ -124,11 +134,11 @@ cd benchmark/general-help
 python evaluate_bedrock_agent.py
 ```
 
-All options have sensible defaults. Override any of them as needed:
+`--agent-id` is required — default is the CCCKP dev agent
 
 ```bash
 python evaluate_bedrock_agent.py \
-  --agent-id 2COISTBHRB \              # Bedrock Agent ID
+  --agent-id RUFQCSSMDI \              # Bedrock Agent ID (required)
   --alias-id TSTALIASID \              # Bedrock Agent alias ID
   --profile default \                  # AWS profile from ~/.aws/credentials
   --region us-east-1 \                 # AWS region
@@ -141,7 +151,7 @@ The default alias `TSTALIASID` always points to the DRAFT version. If you've upd
 
 | Flag | Default | Description |
 |---|---|---|
-| `--agent-id` | `ERAAPKTD4Q` | Bedrock Agent ID (dev) |
+| `--agent-id` | _(required)_ | Bedrock Agent ID — no CCKP agent is deployed yet |
 | `--alias-id` | `TSTALIASID` | Bedrock Agent alias ID |
 | `--profile` | `default` | AWS profile from `~/.aws/credentials` |
 | `--region` | `us-east-1` | AWS region |

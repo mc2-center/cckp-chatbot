@@ -7,26 +7,32 @@ from the agent, or other benchmark outputs) that still need a durable,
 permissioned home so a report citing their numbers stays independently
 reproducible.
 
-All eval results share one Synapse parent project, syn76878333, with a
-subfolder per eval type (`--folder`) so results stay organized as more
-benchmarks start uploading — e.g. `redteam`, `kb-routing`, `general-help`.
-The subfolder is created under `--parent-id` if it doesn't already exist.
+All eval results share one Synapse parent project, with a subfolder per eval
+type (`--folder`) so results stay organized as more benchmarks start
+uploading — e.g. `redteam`, `kb-routing`, `general-help`. The subfolder is
+created under `--parent-id` if it doesn't already exist.
+
+No CCKP eval-results Synapse project has been designated yet — DEFAULT_PARENT_ID
+below is a placeholder. Pass a real project ID via `--parent-id` until one is
+chosen (the NF Portal Copilot's equivalent project is syn76878333, for
+reference on the expected layout — not reusable for CCKP's own results).
 
 Requires a Synapse account with upload access to that project and login
 credentials available to synapseclient (~/.synapseConfig or the
 SYNAPSE_AUTH_TOKEN environment variable).
 
 Usage:
-    # redteam runs -> syn76878333/redteam
+    # redteam runs -> <parent-id>/redteam
     python upload_logs_to_synapse.py --dir benchmark/redteam --folder redteam \\
+        --parent-id syn00000000 \\
         --pattern 'redteam_eval_results_*.json' --pattern 'redteam_aggregate_results.json'
 
-    # explicit files -> syn76878333/kb-routing
-    python upload_logs_to_synapse.py --folder kb-routing \\
+    # explicit files -> <parent-id>/kb-routing
+    python upload_logs_to_synapse.py --folder kb-routing --parent-id syn00000000 \\
         --file benchmark/kb-routing/routing_eval_results_20260620T001142Z.json
 
     python upload_logs_to_synapse.py --dir benchmark/redteam --folder redteam \\
-        --pattern 'redteam_eval_results_*.json' --dry-run
+        --parent-id syn00000000 --pattern 'redteam_eval_results_*.json' --dry-run
 """
 
 from __future__ import annotations
@@ -37,7 +43,7 @@ from pathlib import Path
 import synapseclient
 from synapseclient import File, Folder
 
-DEFAULT_PARENT_ID = "syn76878333"
+DEFAULT_PARENT_ID = "REPLACE_ME_CCKP_EVAL_RESULTS_PROJECT"
 
 
 def parse_args() -> argparse.Namespace:
@@ -62,7 +68,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--parent-id",
         default=DEFAULT_PARENT_ID,
-        help=f"Synapse project all eval results live under (default: {DEFAULT_PARENT_ID})",
+        help=(
+            "Synapse project all eval results live under (default: "
+            f"{DEFAULT_PARENT_ID} — a placeholder; no CCKP project is designated yet)"
+        ),
     )
     parser.add_argument(
         "--folder",

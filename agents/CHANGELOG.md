@@ -1,21 +1,12 @@
 # Changelog
 
-## nf-portal-copilot
+## cckp-copilot
 
-### 2026-06-14 — Harriet
+### Unreleased
 
-- CloudFormation template for the full Copilot stack, replacing the one removed in #39 (#40)
-- Two-stack deployment: `nf-portal-copilot-dev` and `nf-portal-copilot-prod`
-- CI/CD workflow: manual dispatch deploys to dev, merge to main deploys to prod
-- Added docs KB source selection instructions (#41)
-- Optional SPARQL auth token support in Lambda
-- Renamed `nf-portal-pilot` → `nf-portal-copilot`
-
-### 2026-04-21 — Amelia (`B0GQQL40PY`)
-
-- Update underlying model from Claude Sonnet 4 to Claude Haiku 4.5
-- More robust RAG lambda with improved error handling and tests (#29)
-- Deprioritize publication RAG early in conversations; default to base SPARQL graph queries first and reserve SPARQL+Text for deeper exploration later in the thread (#24)
-- Instruction update to address user-controlled navigation (#23, via #30)
-
-Previous alias: `3AOKWTCUHH`
+- Forked from `nf-osi/portal-chatbot`'s NF Portal Copilot and re-targeted at the Cancer Complexity Knowledge Portal (CCKP).
+- Two backend variants: `cloudformation.sql.yaml` (SQL over Synapse View tables, deployable today) and `cloudformation.sparql.yaml` (SPARQL over a CCKP knowledge graph, pending a hosted endpoint).
+- Instructions, redirect targets, and example queries rewritten for CCKP's Dataset/Publication/Tool/Grant/EducationalResource entities.
+- Docs KB expanded to a second source: MC2 Center data model docs (mc2-center.github.io/data-models) alongside the CCKP help site, with a second crawl spider and instruction updates describing the two-source KB.
+- SQL Lambda (`cckpSqlRag`) extended with dataset & file discovery (`getDatasetFiles`, `getFileDetails`, `checkRestriction`), `limit`/`nextPageToken` pagination, and more tolerant response parsing; per-id restriction info is now embedded directly in dataset/file responses so the agent can check public-accessibility before implying a resource is downloadable.
+- Synapse registrations recorded for both SQL-variant stacks — `Cephy-sql-alpha-dev` (#336) and `Cephy-sql-alpha` (#335) — with manual AWS CLI deploy steps documented in `agents/README.md`. Still not deployed: no `AWS_OIDC_ROLE_ARN` role provisioned yet, so the `deploy-copilot-sql.yml`/`deploy-copilot-sparql.yml` CI/CD workflows remain inactive.
