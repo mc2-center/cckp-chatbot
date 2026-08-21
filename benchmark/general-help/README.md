@@ -132,11 +132,11 @@ cd benchmark/general-help
 python evaluate_bedrock_agent.py
 ```
 
-`--agent-id` is required — no CCKP agent has been deployed yet, so there is no default. Override any other option as needed:
+`--agent-id` is required — default is the CCCKP dev agent
 
 ```bash
 python evaluate_bedrock_agent.py \
-  --agent-id 2COISTBHRB \              # Bedrock Agent ID (required)
+  --agent-id RUFQCSSMDI \              # Bedrock Agent ID (required)
   --alias-id TSTALIASID \              # Bedrock Agent alias ID
   --profile default \                  # AWS profile from ~/.aws/credentials
   --region us-east-1 \                 # AWS region
