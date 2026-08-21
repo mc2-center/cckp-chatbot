@@ -112,10 +112,16 @@ class TestExtractParams:
     def test_empty_event(self):
         assert extract_params({}) == {}
 
-    def test_malformed_property_raises(self):
+    def test_malformed_property_skipped(self):
         event = _api_event("/sql-query", [{"wrong_key": "oops"}])
-        with pytest.raises(KeyError):
-            extract_params(event)
+        assert extract_params(event) == {}
+
+    def test_malformed_property_mixed_with_valid(self):
+        event = _api_event("/sql-query", [
+            {"wrong_key": "oops"},
+            {"name": "table", "value": "datasets"},
+        ])
+        assert extract_params(event) == {"table": "datasets"}
 
 
 # ---------------------------------------------------------------------------
@@ -365,6 +371,47 @@ class TestRequest:
         with pytest.raises(TimeoutError):
             _request("GET", "http://x")
 
+    @patch("lambda_function.urllib.request.urlopen")
+    def test_non_json_success_body_does_not_raise(self, mock_urlopen):
+        """A non-JSON 200 body must not blow up json.loads — callers rely on
+        always getting something .get()-able back."""
+        mock_urlopen.return_value.__enter__ = lambda s: s
+        mock_urlopen.return_value.__exit__ = lambda *a: None
+        mock_urlopen.return_value.status = 200
+        mock_urlopen.return_value.read.return_value = b"not json at all"
+        from lambda_function import _request
+        status, body = _request("GET", "http://x")
+        assert status == 200
+        assert body == {"raw": "not json at all"}
+
+    @patch("lambda_function.urllib.request.urlopen")
+    def test_http_error_non_json_body(self, mock_urlopen):
+        err = urllib.error.HTTPError(url="http://x", code=502, msg="Bad Gateway", hdrs={}, fp=None)
+        err.read = lambda: b"<html>gateway error</html>"
+        mock_urlopen.side_effect = err
+        from lambda_function import _request
+        status, detail = _request("GET", "http://x")
+        assert status == 502
+        assert detail == {"raw": "<html>gateway error</html>"}
+
+
+# ---------------------------------------------------------------------------
+# _parse_response_body
+# ---------------------------------------------------------------------------
+
+class TestParseResponseBody:
+    def test_valid_json(self):
+        from lambda_function import _parse_response_body
+        assert _parse_response_body('{"a": 1}') == {"a": 1}
+
+    def test_empty_string(self):
+        from lambda_function import _parse_response_body
+        assert _parse_response_body("") == {}
+
+    def test_invalid_json_falls_back_to_raw(self):
+        from lambda_function import _parse_response_body
+        assert _parse_response_body("not json") == {"raw": "not json"}
+
 
 # ---------------------------------------------------------------------------
 # getDatasetFiles
@@ -429,6 +476,90 @@ class TestGetDatasetFiles:
         resp = lambda_handler(event, None)
         assert "Failed to fetch entity" in _body(resp)["error"]
 
+    @patch("lambda_function._request")
+    def test_non_dict_entity_response(self, mock_request):
+        mock_request.return_value = (200, ["not", "a", "dict"])
+        event = _function_event("getDatasetFiles", [{"name": "id", "value": "syn999"}])
+        resp = lambda_handler(event, None)
+        assert "Failed to fetch entity" in _body(resp)["error"]
+
+    @patch("lambda_function._request")
+    def test_dataset_items_truncated_to_limit(self, mock_request):
+        items = [{"entityId": f"syn{i}", "versionNumber": 1} for i in range(10)]
+        mock_request.side_effect = [
+            (200, {
+                "concreteType": "org.sagebionetworks.repo.model.table.Dataset",
+                "items": items,
+                "count": 10,
+            }),
+            (200, {"restrictionInformation": []}),
+        ]
+        event = _function_event("getDatasetFiles", [
+            {"name": "id", "value": "syn999"},
+            {"name": "limit", "value": "3"},
+        ])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert len(body["items"]) == 3
+        assert body["returnedCount"] == 3
+        assert body["count"] == 10  # true total is preserved even though truncated
+
+    @patch("lambda_function._request")
+    def test_dataset_branch_embeds_restriction(self, mock_request):
+        mock_request.side_effect = [
+            (200, {
+                "concreteType": "org.sagebionetworks.repo.model.table.Dataset",
+                "items": [], "count": 0,
+            }),
+            (200, {"restrictionInformation": [
+                {"objectId": 999, "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False},
+            ]}),
+        ]
+        event = _function_event("getDatasetFiles", [{"name": "id", "value": "syn999"}])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert body["restriction"] == {"restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False}
+        # the restriction check was scoped to the dataset's own id
+        restriction_call_body = mock_request.call_args_list[1].args[2]
+        assert restriction_call_body["objectIds"] == ["syn999"]
+
+    @patch("lambda_function._request")
+    def test_container_forwards_next_page_token(self, mock_request):
+        mock_request.side_effect = [
+            (200, {"concreteType": "org.sagebionetworks.repo.model.Folder"}),
+            (200, {"page": [], "totalChildCount": 0, "sumFileSizesBytes": 0}),
+            (200, {"restrictionInformation": []}),
+        ]
+        event = _function_event("getDatasetFiles", [
+            {"name": "id", "value": "syn999"},
+            {"name": "nextPageToken", "value": "tok-abc"},
+        ])
+        lambda_handler(event, None)
+        children_call_body = mock_request.call_args_list[1].args[2]
+        assert children_call_body["nextPageToken"] == "tok-abc"
+
+    @patch("lambda_function._request")
+    def test_container_omits_next_page_token_when_absent(self, mock_request):
+        mock_request.side_effect = [
+            (200, {"concreteType": "org.sagebionetworks.repo.model.Folder"}),
+            (200, {"page": [], "totalChildCount": 0, "sumFileSizesBytes": 0}),
+            (200, {"restrictionInformation": []}),
+        ]
+        event = _function_event("getDatasetFiles", [{"name": "id", "value": "syn999"}])
+        lambda_handler(event, None)
+        children_call_body = mock_request.call_args_list[1].args[2]
+        assert "nextPageToken" not in children_call_body
+
+    @patch("lambda_function._request")
+    def test_non_dict_children_response(self, mock_request):
+        mock_request.side_effect = [
+            (200, {"concreteType": "org.sagebionetworks.repo.model.Folder"}),
+            (200, "not a dict"),
+        ]
+        event = _function_event("getDatasetFiles", [{"name": "id", "value": "syn999"}])
+        resp = lambda_handler(event, None)
+        assert "Failed to list children" in _body(resp)["error"]
+
     def test_missing_id(self):
         resp = lambda_handler(_function_event("getDatasetFiles"), None)
         assert _body(resp) == {"error": "id is required"}
@@ -455,19 +586,55 @@ class TestGetFileDetails:
 
     @patch("lambda_function._request")
     def test_success_with_version_function(self, mock_request):
-        mock_request.return_value = (200, {"list": []})
+        mock_request.side_effect = [
+            (200, {"list": []}),
+            (200, {"restrictionInformation": [{"objectId": 222, "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False}]}),
+        ]
         event = _function_event("getFileDetails", [
             {"name": "id", "value": "syn222"},
             {"name": "versionNumber", "value": "3"},
         ])
         resp = lambda_handler(event, None)
-        assert _body(resp)["files"] == []
-        called_url = mock_request.call_args.args[1]
+        body = _body(resp)
+        assert body["files"] == []
+        assert body["restriction"] == {"restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False}
+        called_url = mock_request.call_args_list[0].args[1]
         assert "/version/3/filehandles" in called_url
+
+    @patch("lambda_function._request")
+    def test_embeds_restriction_info(self, mock_request):
+        mock_request.side_effect = [
+            (200, {"list": [{"id": "fh1", "fileName": "a.txt", "contentSize": 10, "contentType": "text/plain", "contentMd5": "abc"}]}),
+            (200, {"restrictionInformation": [{"objectId": 222, "restrictionLevel": "CONTROLLED_BY_ACT", "hasUnmetAccessRequirement": True}]}),
+        ]
+        event = _function_event("getFileDetails", [{"name": "id", "value": "syn222"}])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert body["restriction"] == {"restrictionLevel": "CONTROLLED_BY_ACT", "hasUnmetAccessRequirement": True}
+        # restriction lookup was scoped to the same id
+        restriction_call_body = mock_request.call_args_list[1].args[2]
+        assert restriction_call_body["objectIds"] == ["syn222"]
+
+    @patch("lambda_function._request")
+    def test_invalid_version_number(self, mock_request):
+        event = _function_event("getFileDetails", [
+            {"name": "id", "value": "syn222"},
+            {"name": "versionNumber", "value": "not-a-number"},
+        ])
+        resp = lambda_handler(event, None)
+        assert "versionNumber must be an integer" in _body(resp)["error"]
+        mock_request.assert_not_called()
 
     @patch("lambda_function._request")
     def test_fetch_failure(self, mock_request):
         mock_request.return_value = (500, {"reason": "server error"})
+        event = _function_event("getFileDetails", [{"name": "id", "value": "syn222"}])
+        resp = lambda_handler(event, None)
+        assert "Failed to fetch file handles" in _body(resp)["error"]
+
+    @patch("lambda_function._request")
+    def test_non_dict_response_returns_clean_error(self, mock_request):
+        mock_request.return_value = (200, ["unexpected", "list"])
         event = _function_event("getFileDetails", [{"name": "id", "value": "syn222"}])
         resp = lambda_handler(event, None)
         assert "Failed to fetch file handles" in _body(resp)["error"]
@@ -484,8 +651,11 @@ class TestGetFileDetails:
 class TestCheckRestriction:
     @patch("lambda_function._request")
     def test_success_api_path(self, mock_request):
+        # Synapse's real response keys results by a bare integer objectId
+        # (confirmed against the OpenAPI spec), NOT the "synXXXXX" string
+        # sent in the request — the function must translate back to "syn...".
         mock_request.return_value = (200, {"restrictionInformation": [
-            {"objectId": "syn999", "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False},
+            {"objectId": 999, "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False},
         ]})
         event = _api_event("/check-restriction", [{"name": "ids", "value": ["syn999"]}])
         resp = lambda_handler(event, None)
@@ -497,8 +667,8 @@ class TestCheckRestriction:
     @patch("lambda_function._request")
     def test_comma_separated_string_ids_function(self, mock_request):
         mock_request.return_value = (200, {"restrictionInformation": [
-            {"objectId": "syn1", "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False},
-            {"objectId": "syn2", "restrictionLevel": "CONTROLLED_BY_ACT", "hasUnmetAccessRequirement": True},
+            {"objectId": 1, "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False},
+            {"objectId": 2, "restrictionLevel": "CONTROLLED_BY_ACT", "hasUnmetAccessRequirement": True},
         ]})
         event = _function_event("checkRestriction", [{"name": "ids", "value": "syn1, syn2"}])
         resp = lambda_handler(event, None)
@@ -517,6 +687,13 @@ class TestCheckRestriction:
     @patch("lambda_function._request")
     def test_fetch_failure(self, mock_request):
         mock_request.return_value = (500, {"reason": "server error"})
+        event = _function_event("checkRestriction", [{"name": "ids", "value": ["syn999"]}])
+        resp = lambda_handler(event, None)
+        assert "Failed to check restriction info" in _body(resp)["error"]
+
+    @patch("lambda_function._request")
+    def test_non_dict_response_returns_clean_error(self, mock_request):
+        mock_request.return_value = (200, "not a dict")
         event = _function_event("checkRestriction", [{"name": "ids", "value": ["syn999"]}])
         resp = lambda_handler(event, None)
         assert "Failed to check restriction info" in _body(resp)["error"]

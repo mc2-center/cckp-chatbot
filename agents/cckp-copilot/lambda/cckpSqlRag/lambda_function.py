@@ -147,7 +147,8 @@ def extract_params(event: Dict[str, Any]) -> Dict[str, Any]:
 
     params: Dict[str, Any] = {}
     for prop in properties:
-        params[prop["name"]] = prop["value"]
+        if "name" in prop and "value" in prop:
+            params[prop["name"]] = prop["value"]
 
     for item in event.get("parameters", []):
         if "name" in item and "value" in item:
@@ -166,6 +167,20 @@ def _resolve_table(table: str) -> str:
     )
 
 
+def _parse_response_body(text: str) -> Any:
+    """Best-effort JSON decode.
+
+    Falls back to a raw-text wrapper on non-JSON/malformed bodies so callers
+    can always call .get() on the result without raising.
+    """
+    if not text:
+        return {}
+    try:
+        return json.loads(text)
+    except ValueError:
+        return {"raw": text}
+
+
 def _request(method: str, url: str, body: Optional[dict] = None):
     data = json.dumps(body).encode("utf-8") if body is not None else None
     headers = {"Authorization": f"Bearer {SYNAPSE_AUTH_TOKEN}"}
@@ -174,14 +189,10 @@ def _request(method: str, url: str, body: Optional[dict] = None):
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
         with urllib.request.urlopen(req, timeout=QUERY_TIMEOUT) as resp:
-            return resp.status, json.loads(resp.read().decode("utf-8") or "{}")
+            return resp.status, _parse_response_body(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         detail = e.read().decode("utf-8", errors="replace")
-        try:
-            detail = json.loads(detail)
-        except ValueError:
-            pass
-        return e.code, detail
+        return e.code, _parse_response_body(detail)
     except (urllib.error.URLError, socket.timeout) as e:
         reason = getattr(e, "reason", e)
         if isinstance(reason, (socket.timeout, TimeoutError)):
@@ -289,6 +300,19 @@ def count_by_type(params: Dict[str, Any]) -> Dict[str, Any]:
     return result
 
 
+def _check_single_restriction(entity_id: str) -> Dict[str, Any]:
+    """Best-effort restriction check for one id — never raises, so a hiccup
+    here doesn't block the primary discovery call it's embedded in."""
+    try:
+        result = check_restriction({"ids": [entity_id]})
+    except Exception as e:
+        return {"error": str(e)}
+    if "error" in result:
+        return {"error": result["error"]}
+    info = result.get("restrictions", {}).get(entity_id)
+    return info if info is not None else {"error": "No restriction information returned"}
+
+
 def get_dataset_files(params: Dict[str, Any]) -> Dict[str, Any]:
     """List the file contents of a Synapse entity backing a CCKP dataset row
     (e.g. a DatasetView row's `downloadSynId`).
@@ -296,25 +320,33 @@ def get_dataset_files(params: Dict[str, Any]) -> Dict[str, Any]:
     The entity may be a first-class Synapse Dataset (a curated flat list of
     file references, already embedded in its own JSON body) or a plain
     Folder/Project container (whose children must be listed separately).
+
+    Always includes a `restriction` field so callers don't have to remember a
+    separate checkRestriction call before treating the result as accessible.
     """
     entity_id = params.get("id")
     if not entity_id:
         return {"error": "id is required"}
 
     status, entity = _request("GET", f"{SYNAPSE_BASE_URL}/repo/v1/entity/{entity_id}")
-    if status not in (200, 201):
+    if status not in (200, 201) or not isinstance(entity, dict):
         return {"error": f"Failed to fetch entity {entity_id} (HTTP {status}): {entity}"}
 
     concrete_type = entity.get("concreteType", "")
 
     if concrete_type == DATASET_CONCRETE_TYPE:
-        return {
+        items = entity.get("items") or []
+        limit = _clamp_limit(params.get("limit", DEFAULT_LIMIT))
+        result = {
             "type": "dataset",
-            "items": entity.get("items", []),
+            "items": items[:limit],
+            "returnedCount": min(len(items), limit),
             "count": entity.get("count"),
             "size": entity.get("size"),
             "checksum": entity.get("checksum"),
         }
+        result["restriction"] = _check_single_restriction(entity_id)
+        return result
 
     if concrete_type in CONTAINER_CONCRETE_TYPES:
         body = {
@@ -323,10 +355,14 @@ def get_dataset_files(params: Dict[str, Any]) -> Dict[str, Any]:
             "includeTotalChildCount": True,
             "includeSumFileSizes": True,
         }
+        next_page_token = params.get("nextPageToken")
+        if next_page_token:
+            body["nextPageToken"] = next_page_token
+
         status, resp = _request(
             "POST", f"{SYNAPSE_BASE_URL}/repo/v1/entity/children", body
         )
-        if status not in (200, 201):
+        if status not in (200, 201) or not isinstance(resp, dict):
             return {"error": f"Failed to list children of {entity_id} (HTTP {status}): {resp}"}
 
         children = [
@@ -346,6 +382,7 @@ def get_dataset_files(params: Dict[str, Any]) -> Dict[str, Any]:
         }
         if resp.get("nextPageToken"):
             result["nextPageToken"] = resp["nextPageToken"]
+        result["restriction"] = _check_single_restriction(entity_id)
         return result
 
     return {
@@ -361,22 +398,29 @@ def get_file_details(params: Dict[str, Any]) -> Dict[str, Any]:
 
     A bare entity fetch only returns a dataFileHandleId reference; the actual
     file metadata lives on the FileHandle(s) associated with the entity.
+
+    Always includes a `restriction` field so callers don't have to remember a
+    separate checkRestriction call before treating the result as accessible.
     """
     entity_id = params.get("id")
     if not entity_id:
         return {"error": "id is required"}
 
     version = params.get("versionNumber")
-    if version:
+    if version not in (None, ""):
+        try:
+            version = int(version)
+        except (TypeError, ValueError):
+            return {"error": f"versionNumber must be an integer, got {version!r}"}
         url = f"{SYNAPSE_BASE_URL}/repo/v1/entity/{entity_id}/version/{version}/filehandles"
     else:
         url = f"{SYNAPSE_BASE_URL}/repo/v1/entity/{entity_id}/filehandles"
 
     status, resp = _request("GET", url)
-    if status not in (200, 201):
+    if status not in (200, 201) or not isinstance(resp, dict):
         return {"error": f"Failed to fetch file handles for {entity_id} (HTTP {status}): {resp}"}
 
-    handles = resp.get("list", []) if isinstance(resp, dict) else []
+    handles = resp.get("list") or []
     files = [
         {
             "fileHandleId": h.get("id"),
@@ -387,7 +431,11 @@ def get_file_details(params: Dict[str, Any]) -> Dict[str, Any]:
         }
         for h in handles
     ]
-    return {"id": entity_id, "files": files}
+    return {
+        "id": entity_id,
+        "files": files,
+        "restriction": _check_single_restriction(entity_id),
+    }
 
 
 def check_restriction(params: Dict[str, Any]) -> Dict[str, Any]:
@@ -395,6 +443,8 @@ def check_restriction(params: Dict[str, Any]) -> Dict[str, Any]:
 
     Must be called before telling a user a resource is downloadable — CCKP is
     a public-data-only, read-only portal, and not every entity is OPEN.
+    (getDatasetFiles/getFileDetails already embed this per-id, so this
+    function is mainly for checking ids directly, or checking several at once.)
     """
     ids = params.get("ids")
     if not ids:
@@ -410,12 +460,17 @@ def check_restriction(params: Dict[str, Any]) -> Dict[str, Any]:
     status, resp = _request(
         "POST", f"{SYNAPSE_BASE_URL}/repo/v1/restrictionInformation/batch", body
     )
-    if status not in (200, 201):
+    if status not in (200, 201) or not isinstance(resp, dict):
         return {"error": f"Failed to check restriction info (HTTP {status}): {resp}"}
 
     restrictions = {}
     for item in resp.get("restrictionInformation", []):
-        restrictions[str(item.get("objectId"))] = {
+        object_id = item.get("objectId")
+        # objectId comes back as a bare integer (e.g. 12345678); the request
+        # was made in terms of "synXXXXXXX" ids, so restore that form to make
+        # the result keyed the same way callers passed ids in.
+        key = f"syn{object_id}" if object_id is not None else str(object_id)
+        restrictions[key] = {
             "restrictionLevel": item.get("restrictionLevel"),
             "hasUnmetAccessRequirement": item.get("hasUnmetAccessRequirement"),
         }

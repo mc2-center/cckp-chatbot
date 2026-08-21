@@ -98,9 +98,13 @@ paths:
       description: >
         Resolves a Synapse entity id (e.g. a datasets row's downloadSynId) to
         its file contents. If the entity is a first-class Synapse Dataset,
-        returns its curated item list directly. If it's a Folder/Project
-        container, lists its file/folder children instead. Call getColumns
-        or a sqlQuery first to find a row's downloadSynId before calling this.
+        returns its curated item list directly (truncated to `limit`, since a
+        Dataset can hold up to 30,000 items). If it's a Folder/Project
+        container, lists its file/folder children instead (one page per
+        call; pass the previous response's nextPageToken to fetch more).
+        Call getColumns or a sqlQuery first to find a row's downloadSynId
+        before calling this. The response always includes a `restriction`
+        field so a separate checkRestriction call isn't required for this id.
       requestBody:
         required: true
         content:
@@ -127,7 +131,9 @@ paths:
       description: >
         Returns the actual FileHandle metadata for a file entity id, typically
         one surfaced by getDatasetFiles. A bare entity fetch only exposes a
-        file handle reference, not the file's real name/size/type.
+        file handle reference, not the file's real name/size/type. The
+        response always includes a `restriction` field so a separate
+        checkRestriction call isn't required for this id.
       requestBody:
         required: true
         content:
@@ -255,6 +261,18 @@ components:
           description: >
             Raw Synapse entity id backing a dataset row (e.g. its
             downloadSynId), not one of the 5 View table ids.
+        limit:
+          type: integer
+          description: >
+            Only used when the entity is a first-class Dataset. Maximum items
+            to return out of its (possibly up to 30,000-entry) item list
+            (default 25, max 200).
+        nextPageToken:
+          type: string
+          description: >
+            Only used when the entity is a Folder/Project container. Pass
+            the nextPageToken from a previous response to fetch the next
+            page of children.
       additionalProperties: false
     GetDatasetFilesResponse:
       type: object
@@ -266,10 +284,13 @@ components:
           type: array
           items:
             type: object
-          description: Present when type=dataset. Flat list of {entityId, versionNumber} file references.
+          description: Present when type=dataset. Flat list of {entityId, versionNumber} file references, truncated to `limit`.
+        returnedCount:
+          type: integer
+          description: Present when type=dataset. Number of items actually returned (i.e. after truncation to `limit`).
         count:
           type: integer
-          description: Present when type=dataset. Number of items.
+          description: Present when type=dataset. True total number of items in the dataset, independent of truncation.
         size:
           type: integer
           description: Present when type=dataset. Cumulative bytes of all items.
@@ -290,6 +311,13 @@ components:
         nextPageToken:
           type: string
           description: Present when type=container and more children exist beyond this page.
+        restriction:
+          type: object
+          description: >
+            Present for both type=dataset and type=container. Either
+            {restrictionLevel: OPEN|RESTRICTED_BY_TERMS_OF_USE|CONTROLLED_BY_ACT,
+            hasUnmetAccessRequirement} for this id, or {error} if the check
+            itself failed.
         error:
           type: string
           description: Application-level error text returned by the function.
@@ -316,6 +344,12 @@ components:
           items:
             type: object
           description: List of {fileHandleId, fileName, contentSize, contentType, contentMd5}.
+        restriction:
+          type: object
+          description: >
+            Either {restrictionLevel: OPEN|RESTRICTED_BY_TERMS_OF_USE|CONTROLLED_BY_ACT,
+            hasUnmetAccessRequirement} for this file id, or {error} if the
+            check itself failed.
         error:
           type: string
           description: Application-level error text returned by the function.
@@ -337,7 +371,8 @@ components:
         restrictions:
           type: object
           description: >
-            Map of entity id to {restrictionLevel: OPEN|RESTRICTED_BY_TERMS_OF_USE|CONTROLLED_BY_ACT,
+            Map of entity id (in the same "synXXXXXXX" form passed in `ids`)
+            to {restrictionLevel: OPEN|RESTRICTED_BY_TERMS_OF_USE|CONTROLLED_BY_ACT,
             hasUnmetAccessRequirement}.
         error:
           type: string
