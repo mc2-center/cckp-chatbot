@@ -28,8 +28,9 @@ Read `benchmark/general-help/README.md` in full before running anything — it i
 
 3. **Check dependencies.** `generate_dataset.py` imports `openai`, `anthropic`, and `tiktoken` at module level — even Claude-native mode needs these importable, since it imports the script's pure helper functions:
    ```bash
-   python3 -c "import openai, anthropic, tiktoken" 2>&1 || pip install openai anthropic tiktoken
+   python3 -c "import openai, anthropic, tiktoken" 2>&1 || python3 -m pip install openai anthropic tiktoken
    ```
+   Use `python3 -m pip`, not bare `pip` — some environments don't have a `pip` binary on `PATH` even though the `python3` module works fine.
 
 4. **Pick a mode**, and scope the run:
    - Full regeneration (all pages, optionally capped with `--max-batches N`-equivalent for a cheap test pass) vs. focused single-page generation (append-only, matching a URL/filename substring).

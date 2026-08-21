@@ -37,6 +37,8 @@ Verify that `output_markdown/` was created and contains `.md` files — one per 
 
 `generate_dataset.py` reads the crawled Markdown files, builds a prompt, and calls the selected LLM provider using structured output to enforce the `qa_schema.json` format. Each question is assigned a UUID after generation (not by the model).
 
+> **Claude Code users:** the `generate-help-qa-dataset` skill (`.claude/skills/generate-help-qa-dataset/`) runs this step for you, including a Claude-native mode that needs no `OPENAI_API_KEY`/`ANTHROPIC_API_KEY` — Claude generates each batch's questions itself while reusing this script's own batching/prompt/schema/ID-assignment code, so the output is identical in format to a scripted run. Invoke it with a prompt like "generate the help QA dataset" or "run step 2 of the general-help benchmark." The manual CLI steps below still work if you'd rather call the OpenAI/Anthropic API directly.
+
 ### Providers
 
 | Provider | Model | Structured output method |
