@@ -3,9 +3,12 @@
 All Synapse network calls are mocked so no live token/endpoint is needed.
 """
 
+import base64
+import gzip
 import json
 import socket
 import urllib.error
+import urllib.parse
 from unittest.mock import patch
 
 import pytest
@@ -14,10 +17,19 @@ from lambda_function import (
     _make_response,
     _parse_bundle,
     _resolve_table,
+    build_explore_url,
     extract_params,
     lambda_handler,
+    RESOURCE_PATHS,
     TABLES,
 )
+
+
+def _decode_qw0(url):
+    """Reverse the gzip+base64+urlencode round-trip to inspect the query object."""
+    qw0 = url.split("qw0=", 1)[1]
+    raw = base64.b64decode(urllib.parse.unquote(qw0))
+    return json.loads(gzip.decompress(raw))
 
 
 # ---------------------------------------------------------------------------
@@ -701,3 +713,91 @@ class TestCheckRestriction:
     def test_missing_ids(self):
         resp = lambda_handler(_function_event("checkRestriction"), None)
         assert _body(resp) == {"error": "ids is required"}
+
+
+# ---------------------------------------------------------------------------
+# build_explore_url
+# ---------------------------------------------------------------------------
+
+class TestBuildExploreUrl:
+    def test_unfiltered_url(self):
+        result = build_explore_url({"table": "datasets"})
+        assert result["url"].startswith(
+            "https://cancercomplexity.synapse.org/Explore/Datasets/?qw0="
+        )
+        query = _decode_qw0(result["url"])
+        assert query == {
+            "sql": f"SELECT * FROM {TABLES['datasets']}",
+            "includeEntityEtag": False,
+            "isConsistent": True,
+        }
+
+    def test_search_expression_becomes_additional_filters(self):
+        result = build_explore_url({"table": "datasets", "searchExpression": "glioma"})
+        query = _decode_qw0(result["url"])
+        assert query["additionalFilters"] == [{
+            "concreteType": "org.sagebionetworks.repo.model.table.TextMatchesQueryFilter",
+            "searchExpression": "glioma",
+            "searchMode": "NATURAL_LANGUAGE",
+        }]
+        assert "selectedFacets" not in query
+
+    def test_facets_become_selected_facets(self):
+        result = build_explore_url({
+            "table": "datasets",
+            "facets": [{"columnName": "species", "values": ["Zebrafish"]}],
+        })
+        query = _decode_qw0(result["url"])
+        assert query["selectedFacets"] == [{
+            "concreteType": "org.sagebionetworks.repo.model.table.FacetColumnValuesRequest",
+            "columnName": "species",
+            "facetValues": ["Zebrafish"],
+        }]
+        assert "additionalFilters" not in query
+
+    def test_multiple_facets(self):
+        result = build_explore_url({
+            "table": "datasets",
+            "facets": [
+                {"columnName": "species", "values": ["Human"]},
+                {"columnName": "tumorType", "values": ["Glioma", "Glioblastoma"]},
+            ],
+        })
+        query = _decode_qw0(result["url"])
+        assert len(query["selectedFacets"]) == 2
+        assert query["selectedFacets"][1]["facetValues"] == ["Glioma", "Glioblastoma"]
+
+    def test_education_path_has_literal_space(self):
+        result = build_explore_url({"table": "education"})
+        assert result["url"].startswith(
+            "https://cancercomplexity.synapse.org/Explore/Educational%20Resources/"
+        )
+        assert RESOURCE_PATHS["education"] == "Educational Resources"
+
+    def test_missing_table(self):
+        assert build_explore_url({}) == {"error": "table is required"}
+
+    def test_raw_synid_rejected(self):
+        result = build_explore_url({"table": TABLES["datasets"]})
+        assert "error" in result
+        assert "datasets" in result["error"]  # names a valid alias instead
+
+    def test_facet_missing_values_errors(self):
+        result = build_explore_url({
+            "table": "datasets",
+            "facets": [{"columnName": "species"}],
+        })
+        assert result == {"error": "each facet requires columnName and values"}
+
+    def test_via_lambda_handler(self):
+        event = _function_event("buildExploreUrl", [
+            {"name": "table", "value": "publications"},
+            {"name": "searchExpression", "value": "glioma"},
+        ])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert body["url"].startswith(
+            "https://cancercomplexity.synapse.org/Explore/Publications/?qw0="
+        )
+        query = _decode_qw0(body["url"])
+        assert query["sql"] == f"SELECT * FROM {TABLES['publications']}"

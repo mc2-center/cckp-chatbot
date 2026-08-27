@@ -46,6 +46,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/QueryResultResponse"
+  /explore-url:
+    post:
+      tags:
+        - sql
+      operationId: buildExploreUrl
+      summary: Build a working CCKP portal Explore URL, optionally pre-filtered
+      description: >
+        Returns a ready-to-use portal Explore URL for a table, optionally
+        filtered by free-text search and/or exact-value column facets. The
+        portal reads filter state from a compressed `qw0` query param
+        (gzip+base64+urlencoded JSON) that can't be hand-constructed as LLM
+        output, so this function builds it. Use this instead of hand-writing
+        a `<query>` redirect block — a custom SQL WHERE clause embedded in a
+        redirect is silently ignored by the portal (confirmed live); only
+        `searchExpression` and `facets` actually filter results.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BuildExploreUrlRequest"
+            examples:
+              freeTextSearch:
+                value:
+                  table: datasets
+                  searchExpression: glioma
+              facetFilter:
+                value:
+                  table: datasets
+                  facets:
+                    - columnName: species
+                      values: ["Zebrafish"]
+      responses:
+        "200":
+          description: The ready-to-use Explore URL, or an application-level error payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuildExploreUrlResponse"
   /columns:
     post:
       tags:
@@ -199,6 +238,52 @@ components:
         limit:
           type: integer
           description: Maximum rows to return (default 25, max 200).
+      additionalProperties: false
+    BuildExploreUrlRequest:
+      type: object
+      required:
+        - table
+      properties:
+        table:
+          type: string
+          description: >
+            Table alias (datasets, publications, tools, grants, education).
+            Must be an alias, not a raw synId — the Explore URL path segment
+            is derived from it.
+        searchExpression:
+          type: string
+          description: >
+            Optional free-text search term, applied as a natural-language
+            TextMatchesQueryFilter (this is how the portal's own search box
+            filters results).
+        facets:
+          type: array
+          items:
+            type: object
+            required:
+              - columnName
+              - values
+            properties:
+              columnName:
+                type: string
+              values:
+                type: array
+                items:
+                  type: string
+          description: >
+            Optional exact-value column filters, applied as
+            FacetColumnValuesRequest entries (e.g. columnName "species",
+            values ["Zebrafish"]).
+      additionalProperties: false
+    BuildExploreUrlResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          description: Ready-to-use absolute Explore URL with the qw0 filter param already encoded.
+        error:
+          type: string
+          description: Application-level error text returned by the function.
       additionalProperties: false
     GetColumnsRequest:
       type: object

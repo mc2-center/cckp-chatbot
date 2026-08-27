@@ -289,27 +289,28 @@ Resources:
         </chat>
         <actions>
           <redirect>
-            <target>/Explore/{ResourceType}[/DetailsPage?key=value]</target>
-            <query><![CDATA[{"sql": "SELECT * FROM {tableId} WHERE {conditions}", "additionalFilters": [], "selectedFacets": [], "includeEntityEtag": false, "isConsistent": true}]]></query>
+            <target>[a plain Collection/Detail Page path, or the url from buildExploreUrl]</target>
           </redirect>
         </actions>
         ```
 
-        `<target>` is either a Collection path or a Detail Page path (see table below). `<query>` only applies to a Collection-page target — omit it for a Detail Page target, since that URL already carries the identifying param. **The `<query>` `sql` must have `{table}` already replaced with the real synId from the table below (e.g. `syn21897968` for Datasets) — never send `{table}` literally.** Unlike the `sqlQuery` tool call, where the Lambda does that substitution for you, this SQL is sent straight to the portal page and executed as-is; an unresolved `{table}` breaks the redirect silently (the page loads with no/wrong results, no error shown).
+        `<target>` is always a plain URL/path — never hand-build a `<query>`/CDATA block. A custom SQL WHERE clause embedded that way is silently ignored by the portal (confirmed live: the page loads with no/wrong results, no error shown) — the portal only ever reconstructs its query from a compressed `qw0` param that an LLM can't hand-produce (it's gzip-compressed binary data). For an unfiltered Collection or a Detail Page, use the literal path from the table below. For a *filtered* Collection-page redirect, call `buildExploreUrl` first and use its returned `url` verbatim as `<target>`.
 
         ## Resources: Collection & Detail Page Links
 
+        Both confirmed live (real portal hrefs read directly off rendered pages — path segments, no query string, no "DetailsPage"):
+
         | Resource | Collection Target | Detail Page Target | Key field |
         |---|---|---|---|
-        | Datasets | `/Explore/Datasets` (syn21897968) | `/Explore/Datasets/DetailsPage?datasetId={datasetId}` | `datasetId` — a Synapse id when Synapse-hosted, or the dataset's alias (may be a GEO accession/DOI) when externally hosted. Don't assume it's a synId. |
-        | Publications | `/Explore/Publications` (syn21868591) | `/Explore/Publications/DetailsPage?pubMedId={pubMedId}` | `pubMedId` |
-        | Tools | `/Explore/Tools` (syn26127427) | `/Explore/Tools/DetailsPage/Details?toolName={toolName}` | `toolName`, spaces → `+` |
-        | Grants | `/Explore/Grants` (syn21918972) | `/Explore/Grants/DetailsPage?grantId={grantId}` | `grantId` (distinct from the `grantNumber` join key) |
-        | Educational Resources | `/Explore/EducationalResources` (syn51497305) | `/Explore/Educational%20Resources/DetailsPage?title={title}` | `title`, spaces → `+`. Note the Detail path itself is `%20`-encoded, unlike its Collection path — a real portal quirk, not a typo. |
+        | Datasets | `/Explore/Datasets` (syn21897968) | `/Explore/Datasets/{datasetId}` | `datasetId` — a Synapse id when Synapse-hosted, or the dataset's alias (may be a GEO accession/DOI) when externally hosted. Don't assume it's a synId. |
+        | Publications | `/Explore/Publications` (syn21868591) | `/Explore/Publications/{pubMedId}` | `pubMedId` |
+        | Tools | `/Explore/Tools` (syn26127427) | `/Explore/Tools/{toolName}` | `toolName`, spaces → `%20` |
+        | Grants | `/Explore/Grants` (syn21918972) | `/Explore/Grants/{grantId}` | `grantId` — a Synapse id (e.g. `syn9775689`), distinct from the `grantNumber` join key |
+        | Educational Resources | `/Explore/Educational Resources` (syn51497305) — note the literal space | `/Explore/Educational Resources/{title}` | `title`, spaces → `%20` |
 
-        Use Detail Page URLs as markdown link targets in `<chat>` — always, inline, without waiting for a navigation ask. (`datasetId`/`pubMedId`/`grantId` are not free-text names, so the `+`-for-space rule above only applies to `toolName`/`title`.) People/Other resource types exist on the portal but have no confirmed table/route — never redirect to them. If unsure a row has the named key field under that exact name (deployed names can differ from doc labels), confirm via `getColumns` first.
+        Use Detail Page URLs as markdown link targets in `<chat>` — always, inline, without waiting for a navigation ask. `datasetId`/`pubMedId`/`grantId` aren't free-text names, so the `%20`-for-space rule only applies to `toolName`/`title`. People/Other resource types exist on the portal but have no confirmed table/route — never redirect to them. If unsure a row has the named key field under that exact name (deployed names can differ from doc labels), confirm via `getColumns` first.
 
-        **Raw `https://www.synapse.org/Synapse:{id}` links are a narrow fallback** — only for a Dataset itself or a Dataset Collection (e.g. a `getDatasetFiles` container), never for the other four resource types, never preferred over a Detail Page link. Only use an id you've confirmed is a real Synapse entity: the row's `downloadSynId`, or an id returned by `getDatasetFiles`/`checkRestriction`. **Never `datasetId`** for this — it may hold a non-Synapse alias for externally-hosted datasets.
+        **Raw `https://www.synapse.org/#!Synapse:{id}` links are a narrow fallback** — only for a Dataset itself or a Dataset Collection (e.g. a `getDatasetFiles` container), never for the other four resource types, never preferred over a Detail Page link. Only use an id you've confirmed is a real Synapse entity: the row's `downloadSynId`, or an id returned by `getDatasetFiles`/`checkRestriction`. **Never `datasetId`** for this — it may hold a non-Synapse alias for externally-hosted datasets.
 
         ## Source Selection
 
@@ -326,6 +327,7 @@ Resources:
         - `getDatasetFiles(id, limit, nextPageToken)` — call with a dataset row's `downloadSynId`. `type: "dataset"` → `items` (flat file list, possibly truncated — `returnedCount` vs `count`; page via `limit`); `type: "container"` → `children` (Folder/Project, one page — page via `nextPageToken`, only if the user asks for the full listing); `error` → check `sourceRepository`/`externalLink` on the row first: an external `sourceRepository` (e.g. GEO) makes a missing `downloadSynId` expected, not a gap — report the external hosting (name the repo, plus `externalLink`/`doi` if present) rather than relaying a raw error. Response always embeds `restriction`.
         - `getFileDetails(id)` — a specific file's real `fileName`/`contentSize`/`contentType`, plus embedded `restriction`.
         - `checkRestriction(id)` — for any id not already covered by the two functions above.
+        - `buildExploreUrl(table, searchExpression?, facets?)` — the only way to build a *filtered* Collection-page redirect (see Response Format above). `searchExpression` is free text (matches the portal's own search box); `facets` is `[{"columnName": ..., "values": [...]}]` for exact-value column filters. Omit both for an unfiltered Collection URL. Returns `{"url": ...}` — use it verbatim as `<target>`.
 
         ## Worked example
 
@@ -335,14 +337,14 @@ Resources:
         ```xml
         <chat>
         Here are breast cancer datasets using single-cell assays:
-        - [Dataset Name 1](https://cancercomplexity.synapse.org/Explore/Datasets/DetailsPage?datasetId=syn61795461) — single-cell RNA-seq
-        - [Dataset Name 2](https://cancercomplexity.synapse.org/Explore/Datasets/DetailsPage?datasetId=syn61795462) — single-cell ATAC-seq
+        - [Dataset Name 1](https://cancercomplexity.synapse.org/Explore/Datasets/syn61795461) — single-cell RNA-seq
+        - [Dataset Name 2](https://cancercomplexity.synapse.org/Explore/Datasets/syn61795462) — single-cell ATAC-seq
         <guideprompt>Take me to the datasets collection</guideprompt>
         <guideprompt>Tell me more about Dataset Name 1</guideprompt>
         </chat>
         ```
 
-        If the user then asks for the whole filtered collection, redirect with the Collection `<target>` and the same SQL in `<query>` — but with `{table}` replaced by the real synId, e.g. `"sql": "SELECT * FROM syn21897968 WHERE ..."`, not `"sql": "SELECT * FROM {table} WHERE ..."`. If they ask for one specific resource instead ("take me to Dataset Name 1's page"), redirect straight to its Detail Page target instead — no `<query>` needed — never the collection.
+        If the user then asks for the whole filtered collection, call `buildExploreUrl({"table": "datasets", "facets": [{"columnName": "tumorType", "values": ["Breast"]}, {"columnName": "assay", "values": ["Single Cell RNA-Sequencing"]}]})` and use the returned `url` as `<target>` — use the real facet values from the rows you already found, not the fuzzy `LIKE` term you searched with. If they ask for one specific resource instead ("take me to Dataset Name 1's page"), redirect straight to its Detail Page target instead — a literal path, no tool call needed — never the collection.
 
         For file contents ("what files are in this dataset"): get the row's `downloadSynId` via `sqlQuery` (keep its `datasetId`/`sourceRepository`/`externalLink` too), then `getDatasetFiles({"id": downloadSynId})` — e.g. returns `{"type": "dataset", "items": [...], "returnedCount": 25, "count": 42, "size": 1073741824, "restriction": {"restrictionLevel": "OPEN"}}`. Report file count/size and accessibility (per the restriction rule above), then offer `<guideprompt>`s for file detail or the dataset's Detail Page (built from its `datasetId`, never `downloadSynId`).
 
@@ -399,6 +401,45 @@ Resources:
                           application/json:
                             schema:
                               $ref: "#/components/schemas/QueryResultResponse"
+                /explore-url:
+                  post:
+                    tags:
+                      - sql
+                    operationId: buildExploreUrl
+                    summary: Build a working CCKP portal Explore URL, optionally pre-filtered
+                    description: >
+                      Returns a ready-to-use portal Explore URL for a table, optionally
+                      filtered by free-text search and/or exact-value column facets. The
+                      portal reads filter state from a compressed `qw0` query param
+                      (gzip+base64+urlencoded JSON) that can't be hand-constructed as LLM
+                      output, so this function builds it. Use this instead of hand-writing
+                      a `<query>` redirect block — a custom SQL WHERE clause embedded in a
+                      redirect is silently ignored by the portal (confirmed live); only
+                      `searchExpression` and `facets` actually filter results.
+                    requestBody:
+                      required: true
+                      content:
+                        application/json:
+                          schema:
+                            $ref: "#/components/schemas/BuildExploreUrlRequest"
+                          examples:
+                            freeTextSearch:
+                              value:
+                                table: datasets
+                                searchExpression: glioma
+                            facetFilter:
+                              value:
+                                table: datasets
+                                facets:
+                                  - columnName: species
+                                    values: ["Zebrafish"]
+                    responses:
+                      "200":
+                        description: The ready-to-use Explore URL, or an application-level error payload
+                        content:
+                          application/json:
+                            schema:
+                              $ref: "#/components/schemas/BuildExploreUrlResponse"
                 /columns:
                   post:
                     tags:
@@ -551,6 +592,52 @@ Resources:
                       limit:
                         type: integer
                         description: Maximum rows to return (default 25, max 200).
+                    additionalProperties: false
+                  BuildExploreUrlRequest:
+                    type: object
+                    required:
+                      - table
+                    properties:
+                      table:
+                        type: string
+                        description: >
+                          Table alias (datasets, publications, tools, grants, education).
+                          Must be an alias, not a raw synId — the Explore URL path segment
+                          is derived from it.
+                      searchExpression:
+                        type: string
+                        description: >
+                          Optional free-text search term, applied as a natural-language
+                          TextMatchesQueryFilter (this is how the portal's own search box
+                          filters results).
+                      facets:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - columnName
+                            - values
+                          properties:
+                            columnName:
+                              type: string
+                            values:
+                              type: array
+                              items:
+                                type: string
+                        description: >
+                          Optional exact-value column filters, applied as
+                          FacetColumnValuesRequest entries (e.g. columnName "species",
+                          values ["Zebrafish"]).
+                    additionalProperties: false
+                  BuildExploreUrlResponse:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        description: Ready-to-use absolute Explore URL with the qw0 filter param already encoded.
+                      error:
+                        type: string
+                        description: Application-level error text returned by the function.
                     additionalProperties: false
                   GetColumnsRequest:
                     type: object

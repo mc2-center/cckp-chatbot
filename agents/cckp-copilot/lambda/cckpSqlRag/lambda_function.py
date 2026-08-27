@@ -1,8 +1,11 @@
+import base64
+import gzip
 import json
 import os
 import socket
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any, Dict, Optional
 
@@ -27,6 +30,19 @@ TABLES = {
     "grants": "syn21918972",
     "education": "syn51497305",
 }
+
+# Portal Explore path segment per table alias. "education" has a literal
+# space — confirmed against the live site's own nav tab href
+# ("/Explore/Educational Resources"), not "EducationalResources".
+RESOURCE_PATHS = {
+    "datasets": "Datasets",
+    "publications": "Publications",
+    "tools": "Tools",
+    "grants": "Grants",
+    "education": "Educational Resources",
+}
+
+PORTAL_BASE_URL = "https://cancercomplexity.synapse.org"
 
 # partMask bits (Synapse): query results = 0x1, count = 0x2, select columns = 0x4
 PART_RESULTS = 0x1
@@ -91,6 +107,8 @@ def lambda_handler(event, context):
 
         if function == "sqlQuery":
             response_body = sql_query(params)
+        elif function == "buildExploreUrl":
+            response_body = build_explore_url(params)
         elif function == "getColumns":
             response_body = get_columns_fn(params)
         elif function == "countByType":
@@ -130,6 +148,7 @@ def lambda_handler(event, context):
 def map_api_path_to_function(api_path: str) -> Optional[str]:
     mapping = {
         "/sql-query": "sqlQuery",
+        "/explore-url": "buildExploreUrl",
         "/columns": "getColumns",
         "/count-by-type": "countByType",
         "/dataset-files": "getDatasetFiles",
@@ -264,6 +283,79 @@ def sql_query(params: Dict[str, Any]) -> Dict[str, Any]:
     limit = _clamp_limit(params.get("limit", DEFAULT_LIMIT))
     bundle = _run_query(syn_id, sql, limit, PART_RESULTS | PART_COUNT)
     return _parse_bundle(bundle)
+
+
+def build_explore_url(params: Dict[str, Any]) -> Dict[str, Any]:
+    """Build a working CCKP portal Explore URL, optionally pre-filtered.
+
+    The portal's Explore pages read search/filter state from a `qw0` query
+    param: gzip-compressed, base64-encoded, URL-encoded JSON. This can't be
+    produced by an LLM as generated text (gzip is a binary format with
+    checksums), so it's computed here instead — the caller gets back a
+    ready-to-use absolute URL and should use it verbatim as a redirect
+    target, no further assembly needed.
+
+    IMPORTANT: the portal ignores any custom WHERE clause placed in the
+    `sql` field of this query object — confirmed by live-testing against
+    staging.cancercomplexity.synapse.org. It always reconstructs its own
+    query from `additionalFilters` (free-text search) and `selectedFacets`
+    (exact-value column filters), so filtering here must go through
+    `searchExpression`/`facets`, not a hand-written SQL WHERE clause. The
+    `sql` this function sends is always the bare `SELECT * FROM {tableId}`.
+
+    `table` must be one of the 5 known aliases (not a raw synId) since the
+    Explore path segment is derived from it, not just the table's synId.
+    """
+    table = params.get("table")
+    if not table:
+        return {"error": "table is required"}
+    if table not in RESOURCE_PATHS:
+        return {
+            "error": (
+                f"Unknown table alias {table!r} for URL building. Use one "
+                f"of: {', '.join(RESOURCE_PATHS)} (a raw synId can't be "
+                "mapped to an Explore path)."
+            )
+        }
+
+    syn_id = TABLES[table]
+
+    query: Dict[str, Any] = {
+        "sql": f"SELECT * FROM {syn_id}",
+        "includeEntityEtag": False,
+        "isConsistent": True,
+    }
+
+    search_expression = params.get("searchExpression")
+    if search_expression:
+        query["additionalFilters"] = [{
+            "concreteType": "org.sagebionetworks.repo.model.table.TextMatchesQueryFilter",
+            "searchExpression": search_expression,
+            "searchMode": "NATURAL_LANGUAGE",
+        }]
+
+    facets = params.get("facets")
+    if facets:
+        selected_facets = []
+        for facet in facets:
+            column_name = facet.get("columnName")
+            values = facet.get("values")
+            if not column_name or not values:
+                return {"error": "each facet requires columnName and values"}
+            selected_facets.append({
+                "concreteType": "org.sagebionetworks.repo.model.table.FacetColumnValuesRequest",
+                "columnName": column_name,
+                "facetValues": values,
+            })
+        query["selectedFacets"] = selected_facets
+
+    payload = json.dumps(query, separators=(",", ":")).encode("utf-8")
+    compressed = gzip.compress(payload)
+    qw0 = urllib.parse.quote(base64.b64encode(compressed).decode("ascii"))
+
+    path_segment = urllib.parse.quote(RESOURCE_PATHS[table])
+    url = f"{PORTAL_BASE_URL}/Explore/{path_segment}/?qw0={qw0}"
+    return {"url": url}
 
 
 def get_columns_fn(params: Dict[str, Any]) -> Dict[str, Any]:
