@@ -42,8 +42,6 @@ RESOURCE_PATHS = {
     "education": "Educational Resources",
 }
 
-PORTAL_BASE_URL = "https://cancercomplexity.synapse.org"
-
 # partMask bits (Synapse): query results = 0x1, count = 0x2, select columns = 0x4
 PART_RESULTS = 0x1
 PART_COUNT = 0x2
@@ -286,14 +284,23 @@ def sql_query(params: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def build_explore_url(params: Dict[str, Any]) -> Dict[str, Any]:
-    """Build a working CCKP portal Explore URL, optionally pre-filtered.
+    """Build a working CCKP portal Explore path, optionally pre-filtered.
 
     The portal's Explore pages read search/filter state from a `qw0` query
     param: gzip-compressed, base64-encoded, URL-encoded JSON. This can't be
     produced by an LLM as generated text (gzip is a binary format with
     checksums), so it's computed here instead — the caller gets back a
-    ready-to-use absolute URL and should use it verbatim as a redirect
-    target, no further assembly needed.
+    ready-to-use path and should use it verbatim as a redirect target, no
+    further assembly needed.
+
+    Returns a *relative* path (e.g. "/Explore/Datasets/?qw0=..."), matching
+    every other redirect target this agent has ever used — a plain literal
+    Collection/Detail Page path is always relative, never a full URL with a
+    domain. An earlier version of this function returned an absolute URL
+    (with the https://... domain prefix), which broke redirects in
+    practice: the chat frontend's redirect handler expects `<target>` to be
+    a path it resolves against its own base URL, not an already-absolute
+    URL to use as-is.
 
     IMPORTANT: the portal ignores any custom WHERE clause placed in the
     `sql` field of this query object — confirmed by live-testing against
@@ -353,8 +360,21 @@ def build_explore_url(params: Dict[str, Any]) -> Dict[str, Any]:
     compressed = gzip.compress(payload)
     qw0 = urllib.parse.quote(base64.b64encode(compressed).decode("ascii"))
 
+    # Self-verify before returning: decode our own qw0 back to the query we
+    # just built. This only catches a bug in this function's own encoding
+    # (e.g. a future change to the gzip/base64/urlencode steps) — it can't
+    # catch the model mangling the string afterward, since that happens
+    # downstream of this return value. Still worth doing: better to return
+    # an explicit error here than a URL that silently doesn't work.
+    try:
+        roundtrip = json.loads(gzip.decompress(base64.b64decode(urllib.parse.unquote(qw0))))
+    except Exception as e:
+        return {"error": f"internal error: qw0 failed to self-verify ({e})"}
+    if roundtrip != query:
+        return {"error": "internal error: qw0 self-verification mismatch"}
+
     path_segment = urllib.parse.quote(RESOURCE_PATHS[table])
-    url = f"{PORTAL_BASE_URL}/Explore/{path_segment}/?qw0={qw0}"
+    url = f"/Explore/{path_segment}/?qw0={qw0}"
     return {"url": url}
 
 

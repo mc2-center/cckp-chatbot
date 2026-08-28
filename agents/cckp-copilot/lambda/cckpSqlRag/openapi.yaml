@@ -280,7 +280,11 @@ components:
       properties:
         url:
           type: string
-          description: Ready-to-use absolute Explore URL with the qw0 filter param already encoded.
+          description: >
+            Ready-to-use relative Explore path (e.g. "/Explore/Datasets/?qw0=...")
+            with the qw0 filter param already encoded. Relative, not absolute —
+            use verbatim as a redirect target, same as any other Collection/Detail
+            Page path.
         error:
           type: string
           description: Application-level error text returned by the function.

@@ -32,6 +32,13 @@ def _decode_qw0(url):
     return json.loads(gzip.decompress(raw))
 
 
+# Precomputed at import time — deliberately the "wrong" payload for
+# TestBuildExploreUrl.test_self_verification_catches_encoding_bug. Must be
+# computed before that test's @patch("lambda_function.gzip.compress") is
+# active, since that patch replaces the real gzip.compress process-wide.
+_WRONG_COMPRESSED_PAYLOAD = gzip.compress(b'{"not": "the real query"}')
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -722,9 +729,7 @@ class TestCheckRestriction:
 class TestBuildExploreUrl:
     def test_unfiltered_url(self):
         result = build_explore_url({"table": "datasets"})
-        assert result["url"].startswith(
-            "https://cancercomplexity.synapse.org/Explore/Datasets/?qw0="
-        )
+        assert result["url"].startswith("/Explore/Datasets/?qw0=")
         query = _decode_qw0(result["url"])
         assert query == {
             "sql": f"SELECT * FROM {TABLES['datasets']}",
@@ -769,13 +774,34 @@ class TestBuildExploreUrl:
 
     def test_education_path_has_literal_space(self):
         result = build_explore_url({"table": "education"})
-        assert result["url"].startswith(
-            "https://cancercomplexity.synapse.org/Explore/Educational%20Resources/"
-        )
+        assert result["url"].startswith("/Explore/Educational%20Resources/")
         assert RESOURCE_PATHS["education"] == "Educational Resources"
+
+    def test_url_is_relative_not_absolute(self):
+        # A prior version returned an absolute URL (with the https://...
+        # domain), which broke the chat frontend's redirect handling — it
+        # resolves <target> against its own base URL, same as every other
+        # literal Collection/Detail Page target this agent uses.
+        result = build_explore_url({"table": "datasets"})
+        assert not result["url"].startswith("http")
 
     def test_missing_table(self):
         assert build_explore_url({}) == {"error": "table is required"}
+
+    @patch("lambda_function.gzip.compress")
+    def test_self_verification_catches_encoding_bug(self, mock_compress):
+        # Simulate a future regression in the encode step (e.g. compressing
+        # the wrong bytes) — self-verification must catch it and return an
+        # error rather than a URL that silently doesn't work.
+        mock_compress.return_value = _WRONG_COMPRESSED_PAYLOAD
+        result = build_explore_url({"table": "datasets"})
+        assert result == {"error": "internal error: qw0 self-verification mismatch"}
+
+    def test_self_verification_passes_for_real_output(self):
+        # The success-path counterpart: real output must NOT trip the check.
+        result = build_explore_url({"table": "datasets", "searchExpression": "glioma"})
+        assert "error" not in result
+        assert "url" in result
 
     def test_raw_synid_rejected(self):
         result = build_explore_url({"table": TABLES["datasets"]})
@@ -796,8 +822,6 @@ class TestBuildExploreUrl:
         ])
         resp = lambda_handler(event, None)
         body = _body(resp)
-        assert body["url"].startswith(
-            "https://cancercomplexity.synapse.org/Explore/Publications/?qw0="
-        )
+        assert body["url"].startswith("/Explore/Publications/?qw0=")
         query = _decode_qw0(body["url"])
         assert query["sql"] == f"SELECT * FROM {TABLES['publications']}"

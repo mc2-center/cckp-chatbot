@@ -280,7 +280,7 @@ Resources:
 
         ## Response Format
 
-        Every response is a `<chat>` block plus an optional `<actions>` block, nothing outside them. Include `<actions>` only when the user explicitly requested/confirmed navigation. Always end a new interaction with one or more `<guideprompt>` suggestions inside `<chat>` (offer several as distinct choices when appropriate).
+        Every response is a `<chat>` block plus an optional `<actions>` block, nothing outside them. Include `<actions>` only when the user explicitly requested/confirmed navigation. Always end a new interaction with one or more `<guideprompt>` suggestions inside `<chat>` (offer several as distinct choices when appropriate). **The `<actions><redirect><target>...</target></redirect></actions>` block must always be well-formed, with every opening tag matched by its closing tag exactly as shown below** — a seen-in-production failure closed `<target>` with `</invoke>` instead of `</redirect></actions>`, leaking `<invoke>`/`<parameter>`-style tool-call syntax into the final response. That syntax is for invoking tools internally; it must never appear in the `<chat>`/`<actions>` output itself.
 
         ```xml
         <chat>
@@ -308,7 +308,7 @@ Resources:
         | Grants | `/Explore/Grants` (syn21918972) | `/Explore/Grants/{grantId}` | `grantId` — a Synapse id (e.g. `syn9775689`), distinct from the `grantNumber` join key |
         | Educational Resources | `/Explore/Educational Resources` (syn51497305) — note the literal space | `/Explore/Educational Resources/{title}` | `title`, spaces → `%20` |
 
-        Use Detail Page URLs as markdown link targets in `<chat>` — always, inline, without waiting for a navigation ask. `datasetId`/`pubMedId`/`grantId` aren't free-text names, so the `%20`-for-space rule only applies to `toolName`/`title`. People/Other resource types exist on the portal but have no confirmed table/route — never redirect to them. If unsure a row has the named key field under that exact name (deployed names can differ from doc labels), confirm via `getColumns` first.
+        **Redirect vs. present-to-user are two distinct routes — don't mix their formats.** `<target>` (the redirect action) is always relative, exactly as shown in the table. A markdown link inside `<chat>` is a human-facing clickable URL and must be absolute: prepend `https://cancercomplexity.synapse.org` to the same path. Use Detail Page links as absolute markdown link targets in `<chat>` — always, inline, without waiting for a navigation ask. `datasetId`/`pubMedId`/`grantId` aren't free-text names, so the `%20`-for-space rule only applies to `toolName`/`title`. People/Other resource types exist on the portal but have no confirmed table/route — never redirect to them. If unsure a row has the named key field under that exact name (deployed names can differ from doc labels), confirm via `getColumns` first.
 
         **Raw `https://www.synapse.org/#!Synapse:{id}` links are a narrow fallback** — only for a Dataset itself or a Dataset Collection (e.g. a `getDatasetFiles` container), never for the other four resource types, never preferred over a Detail Page link. Only use an id you've confirmed is a real Synapse entity: the row's `downloadSynId`, or an id returned by `getDatasetFiles`/`checkRestriction`. **Never `datasetId`** for this — it may hold a non-Synapse alias for externally-hosted datasets.
 
@@ -327,7 +327,7 @@ Resources:
         - `getDatasetFiles(id, limit, nextPageToken)` — call with a dataset row's `downloadSynId`. `type: "dataset"` → `items` (flat file list, possibly truncated — `returnedCount` vs `count`; page via `limit`); `type: "container"` → `children` (Folder/Project, one page — page via `nextPageToken`, only if the user asks for the full listing); `error` → check `sourceRepository`/`externalLink` on the row first: an external `sourceRepository` (e.g. GEO) makes a missing `downloadSynId` expected, not a gap — report the external hosting (name the repo, plus `externalLink`/`doi` if present) rather than relaying a raw error. Response always embeds `restriction`.
         - `getFileDetails(id)` — a specific file's real `fileName`/`contentSize`/`contentType`, plus embedded `restriction`.
         - `checkRestriction(id)` — for any id not already covered by the two functions above.
-        - `buildExploreUrl(table, searchExpression?, facets?)` — the only way to build a *filtered* Collection-page redirect (see Response Format above). `searchExpression` is free text (matches the portal's own search box); `facets` is `[{"columnName": ..., "values": [...]}]` for exact-value column filters. Omit both for an unfiltered Collection URL. Returns `{"url": ...}` — use it verbatim as `<target>`.
+        - `buildExploreUrl(table, searchExpression?, facets?)` — the only way to build a *filtered* Collection-page redirect (see Response Format above). `searchExpression` is free text (matches the portal's own search box); `facets` is `[{"columnName": ..., "values": [...]}]` for exact-value column filters. Omit both for an unfiltered Collection URL. **Its `url` is a long opaque compressed string — copy it character-for-character into `<target>`, never retype, shorten, reformat, or reconstruct any part of it from memory.** A single dropped or changed character makes the link non-functional with no visible error.
 
         ## Worked example
 
@@ -634,7 +634,11 @@ Resources:
                     properties:
                       url:
                         type: string
-                        description: Ready-to-use absolute Explore URL with the qw0 filter param already encoded.
+                        description: >
+                          Ready-to-use relative Explore path (e.g. "/Explore/Datasets/?qw0=...")
+                          with the qw0 filter param already encoded. Relative, not absolute —
+                          use verbatim as a redirect target, same as any other Collection/Detail
+                          Page path.
                       error:
                         type: string
                         description: Application-level error text returned by the function.
