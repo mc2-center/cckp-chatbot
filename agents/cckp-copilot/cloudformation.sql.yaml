@@ -105,7 +105,7 @@ Parameters:
 
   FoundationModelId:
     Type: String
-    Default: anthropic.claude-sonnet-5
+    Default: anthropic.claude-sonnet-4-6
     AllowedPattern: "^(?!us\\.).*"
     ConstraintDescription: >
       Do not include the "us." cross-region prefix — the template prepends it automatically.

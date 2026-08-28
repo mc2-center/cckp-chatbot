@@ -36,7 +36,7 @@
 .DEFAULT_GOAL := help
 
 AWS_REGION ?= us-east-1
-FOUNDATION_MODEL_ID ?= anthropic.claude-sonnet-5
+FOUNDATION_MODEL_ID ?= anthropic.claude-sonnet-4-6
 S3_BUCKET ?= cckp-chatbot
 
 AWS := aws --region $(AWS_REGION) $(if $(AWS_PROFILE),--profile $(AWS_PROFILE),)
