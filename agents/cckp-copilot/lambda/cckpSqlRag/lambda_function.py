@@ -307,8 +307,17 @@ def build_explore_url(params: Dict[str, Any]) -> Dict[str, Any]:
     staging.cancercomplexity.synapse.org. It always reconstructs its own
     query from `additionalFilters` (free-text search) and `selectedFacets`
     (exact-value column filters), so filtering here must go through
-    `searchExpression`/`facets`, not a hand-written SQL WHERE clause. The
+    `searchExpressions`/`facets`, not a hand-written SQL WHERE clause. The
     `sql` this function sends is always the bare `SELECT * FROM {tableId}`.
+
+    `searchExpressions` is a list, not a single string: each entry becomes
+    its own independent `TextMatchesQueryFilter`, rendered by the portal as
+    a separate, independently-removable filter chip and AND'd together —
+    confirmed live against staging. Passing ["glioma", "single cell RNA
+    sequencing"] produces two chips ("glioma" and "single cell RNA
+    sequencing"); this is different from passing one merged string
+    ("glioma single cell RNA sequencing"), which produces a single chip
+    searched as one phrase.
 
     `table` must be one of the 5 known aliases (not a raw synId) since the
     Explore path segment is derived from it, not just the table's synId.
@@ -333,13 +342,20 @@ def build_explore_url(params: Dict[str, Any]) -> Dict[str, Any]:
         "isConsistent": True,
     }
 
-    search_expression = params.get("searchExpression")
-    if search_expression:
-        query["additionalFilters"] = [{
-            "concreteType": "org.sagebionetworks.repo.model.table.TextMatchesQueryFilter",
-            "searchExpression": search_expression,
-            "searchMode": "NATURAL_LANGUAGE",
-        }]
+    search_expressions = params.get("searchExpressions")
+    if search_expressions:
+        if not isinstance(search_expressions, list):
+            return {"error": "searchExpressions must be a list of strings"}
+        additional_filters = []
+        for expression in search_expressions:
+            if not expression or not isinstance(expression, str):
+                return {"error": "each searchExpressions entry must be a non-empty string"}
+            additional_filters.append({
+                "concreteType": "org.sagebionetworks.repo.model.table.TextMatchesQueryFilter",
+                "searchExpression": expression,
+                "searchMode": "NATURAL_LANGUAGE",
+            })
+        query["additionalFilters"] = additional_filters
 
     facets = params.get("facets")
     if facets:

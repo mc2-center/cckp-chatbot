@@ -738,7 +738,7 @@ class TestBuildExploreUrl:
         }
 
     def test_search_expression_becomes_additional_filters(self):
-        result = build_explore_url({"table": "datasets", "searchExpression": "glioma"})
+        result = build_explore_url({"table": "datasets", "searchExpressions": ["glioma"]})
         query = _decode_qw0(result["url"])
         assert query["additionalFilters"] == [{
             "concreteType": "org.sagebionetworks.repo.model.table.TextMatchesQueryFilter",
@@ -746,6 +746,37 @@ class TestBuildExploreUrl:
             "searchMode": "NATURAL_LANGUAGE",
         }]
         assert "selectedFacets" not in query
+
+    def test_multiple_search_expressions_become_independent_filters(self):
+        # Confirmed live against staging: each entry renders as its own
+        # separate, independently-removable filter chip, AND'd together —
+        # distinct from merging them into one string, which searches as a
+        # single phrase instead.
+        result = build_explore_url({
+            "table": "publications",
+            "searchExpressions": ["glioma", "single cell RNA sequencing"],
+        })
+        query = _decode_qw0(result["url"])
+        assert query["additionalFilters"] == [
+            {
+                "concreteType": "org.sagebionetworks.repo.model.table.TextMatchesQueryFilter",
+                "searchExpression": "glioma",
+                "searchMode": "NATURAL_LANGUAGE",
+            },
+            {
+                "concreteType": "org.sagebionetworks.repo.model.table.TextMatchesQueryFilter",
+                "searchExpression": "single cell RNA sequencing",
+                "searchMode": "NATURAL_LANGUAGE",
+            },
+        ]
+
+    def test_search_expressions_must_be_a_list(self):
+        result = build_explore_url({"table": "datasets", "searchExpressions": "glioma"})
+        assert result == {"error": "searchExpressions must be a list of strings"}
+
+    def test_search_expressions_rejects_empty_entry(self):
+        result = build_explore_url({"table": "datasets", "searchExpressions": ["glioma", ""]})
+        assert result == {"error": "each searchExpressions entry must be a non-empty string"}
 
     def test_facets_become_selected_facets(self):
         result = build_explore_url({
@@ -799,7 +830,7 @@ class TestBuildExploreUrl:
 
     def test_self_verification_passes_for_real_output(self):
         # The success-path counterpart: real output must NOT trip the check.
-        result = build_explore_url({"table": "datasets", "searchExpression": "glioma"})
+        result = build_explore_url({"table": "datasets", "searchExpressions": ["glioma"]})
         assert "error" not in result
         assert "url" in result
 
@@ -818,7 +849,7 @@ class TestBuildExploreUrl:
     def test_via_lambda_handler(self):
         event = _function_event("buildExploreUrl", [
             {"name": "table", "value": "publications"},
-            {"name": "searchExpression", "value": "glioma"},
+            {"name": "searchExpressions", "value": ["glioma"]},
         ])
         resp = lambda_handler(event, None)
         body = _body(resp)

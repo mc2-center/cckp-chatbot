@@ -60,7 +60,7 @@ paths:
         output, so this function builds it. Use this instead of hand-writing
         a `<query>` redirect block — a custom SQL WHERE clause embedded in a
         redirect is silently ignored by the portal (confirmed live); only
-        `searchExpression` and `facets` actually filter results.
+        `searchExpressions` and `facets` actually filter results.
       requestBody:
         required: true
         content:
@@ -71,7 +71,11 @@ paths:
               freeTextSearch:
                 value:
                   table: datasets
-                  searchExpression: glioma
+                  searchExpressions: [glioma]
+              combinedFreeTextSearch:
+                value:
+                  table: publications
+                  searchExpressions: [glioma, single cell RNA sequencing]
               facetFilter:
                 value:
                   table: datasets
@@ -250,12 +254,18 @@ components:
             Table alias (datasets, publications, tools, grants, education).
             Must be an alias, not a raw synId — the Explore URL path segment
             is derived from it.
-        searchExpression:
-          type: string
+        searchExpressions:
+          type: array
+          items:
+            type: string
           description: >
-            Optional free-text search term, applied as a natural-language
-            TextMatchesQueryFilter (this is how the portal's own search box
-            filters results).
+            Optional list of free-text search terms. Each entry becomes its
+            own independent, natural-language TextMatchesQueryFilter,
+            rendered by the portal as a separate, independently-removable
+            filter chip and AND'd together (confirmed live). Use one entry
+            per distinct concept — e.g. ["glioma", "single cell RNA
+            sequencing"] for two combined filters — rather than merging them
+            into one string, which searches as a single phrase instead.
         facets:
           type: array
           items:

@@ -132,12 +132,12 @@ Parameters:
 
   KnowledgeBaseId:
     Type: String
-    Default: VU9HSFAGGE
+    Default: KTM8BHLEXL
     Description: >
       ID of a Bedrock Knowledge Base to attach (created separately), built
       from a crawl of help.cancercomplexity.synapse.org and the MC2 Center
       data model docs (mc2-center.github.io/data-models). Set to empty
-      string to skip. No CCKP KB has been provisioned yet.
+      string to skip.
 
   LambdaS3Bucket:
     Type: String
@@ -251,7 +251,7 @@ Resources:
               - Effect: Allow
                 Action: bedrock:Retrieve
                 Resource:
-                  - !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/${KnowledgeBaseId}"
+                  - !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/KTM8BHLEXL"
 
   # ---- Bedrock Agent --------------------------------------------------------
   BedrockAgent:
@@ -327,7 +327,7 @@ Resources:
         - `getDatasetFiles(id, limit, nextPageToken)` — call with a dataset row's `downloadSynId`. `type: "dataset"` → `items` (flat file list, possibly truncated — `returnedCount` vs `count`; page via `limit`); `type: "container"` → `children` (Folder/Project, one page — page via `nextPageToken`, only if the user asks for the full listing); `error` → check `sourceRepository`/`externalLink` on the row first: an external `sourceRepository` (e.g. GEO) makes a missing `downloadSynId` expected, not a gap — report the external hosting (name the repo, plus `externalLink`/`doi` if present) rather than relaying a raw error. Response always embeds `restriction`.
         - `getFileDetails(id)` — a specific file's real `fileName`/`contentSize`/`contentType`, plus embedded `restriction`.
         - `checkRestriction(id)` — for any id not already covered by the two functions above.
-        - `buildExploreUrl(table, searchExpression?, facets?)` — the only way to build a *filtered* Collection-page redirect (see Response Format above). `searchExpression` is free text (matches the portal's own search box); `facets` is `[{"columnName": ..., "values": [...]}]` for exact-value column filters. Omit both for an unfiltered Collection URL. **Its `url` is a long opaque compressed string — copy it character-for-character into `<target>`, never retype, shorten, reformat, or reconstruct any part of it from memory.** A single dropped or changed character makes the link non-functional with no visible error.
+        - `buildExploreUrl(table, searchExpressions?, facets?)` — the only way to build a *filtered* Collection-page redirect (see Response Format above). `searchExpressions` is a list of free-text terms (matches the portal's own search box) — each entry becomes its own independent, AND'd filter chip, so use one entry per distinct concept (e.g. `["glioma", "single cell RNA sequencing"]` for two combined filters) rather than merging them into one string, which searches as a single phrase instead. `facets` is `[{"columnName": ..., "values": [...]}]` for exact-value column filters. Omit both for an unfiltered Collection URL. **Its `url` is a long opaque compressed string — copy it character-for-character into `<target>`, never retype, shorten, reformat, or reconstruct any part of it from memory.** A single dropped or changed character makes the link non-functional with no visible error.
 
         ## Worked example
 
@@ -415,7 +415,7 @@ Resources:
                       output, so this function builds it. Use this instead of hand-writing
                       a `<query>` redirect block — a custom SQL WHERE clause embedded in a
                       redirect is silently ignored by the portal (confirmed live); only
-                      `searchExpression` and `facets` actually filter results.
+                      `searchExpressions` and `facets` actually filter results.
                     requestBody:
                       required: true
                       content:
@@ -426,7 +426,11 @@ Resources:
                             freeTextSearch:
                               value:
                                 table: datasets
-                                searchExpression: glioma
+                                searchExpressions: [glioma]
+                            combinedFreeTextSearch:
+                              value:
+                                table: publications
+                                searchExpressions: [glioma, single cell RNA sequencing]
                             facetFilter:
                               value:
                                 table: datasets
@@ -604,12 +608,18 @@ Resources:
                           Table alias (datasets, publications, tools, grants, education).
                           Must be an alias, not a raw synId — the Explore URL path segment
                           is derived from it.
-                      searchExpression:
-                        type: string
+                      searchExpressions:
+                        type: array
+                        items:
+                          type: string
                         description: >
-                          Optional free-text search term, applied as a natural-language
-                          TextMatchesQueryFilter (this is how the portal's own search box
-                          filters results).
+                          Optional list of free-text search terms. Each entry becomes its
+                          own independent, natural-language TextMatchesQueryFilter,
+                          rendered by the portal as a separate, independently-removable
+                          filter chip and AND'd together (confirmed live). Use one entry
+                          per distinct concept — e.g. ["glioma", "single cell RNA
+                          sequencing"] for two combined filters — rather than merging them
+                          into one string, which searches as a single phrase instead.
                       facets:
                         type: array
                         items:
