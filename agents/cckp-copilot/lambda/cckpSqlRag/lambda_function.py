@@ -156,6 +156,37 @@ def map_api_path_to_function(api_path: str) -> Optional[str]:
     return mapping.get(api_path)
 
 
+def _coerce_property_value(declared_type: Optional[str], value: Any) -> Any:
+    """Decode a Bedrock action-group property value into a real Python type.
+
+    Bedrock always sends `value` as a string in the Lambda invocation event,
+    even for properties whose OpenAPI schema declares `type: array` or
+    `type: object` — confirmed via AWS's own docs for the action-group
+    Lambda input event (agents-lambda.html), which show every `properties`
+    entry as `{"name": "string", "type": "string", "value": "string"}` with
+    no exception for non-scalar types.
+
+    Worse, array values sometimes arrive as malformed pseudo-JSON — bracketed
+    but with bare, unquoted, comma-separated scalars, e.g.
+    "[breast cancer, RNA sequencing]" instead of valid JSON
+    '["breast cancer", "RNA sequencing"]' — a quirk also independently
+    reported on AWS re:Post, not something specific to this Lambda. A plain
+    `json.loads` alone doesn't cover that case, so this falls back to a
+    manual bracket/comma parse when JSON decoding fails.
+    """
+    if declared_type not in ("array", "object") or not isinstance(value, str):
+        return value
+    text = value.strip()
+    try:
+        return json.loads(text)
+    except (ValueError, TypeError):
+        pass
+    if declared_type == "array" and text.startswith("[") and text.endswith("]"):
+        inner = text[1:-1].strip()
+        return [item.strip() for item in inner.split(",")] if inner else []
+    return value
+
+
 def extract_params(event: Dict[str, Any]) -> Dict[str, Any]:
     request_body = event.get("requestBody", {})
     content = request_body.get("content", {})
@@ -165,11 +196,11 @@ def extract_params(event: Dict[str, Any]) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
     for prop in properties:
         if "name" in prop and "value" in prop:
-            params[prop["name"]] = prop["value"]
+            params[prop["name"]] = _coerce_property_value(prop.get("type"), prop["value"])
 
     for item in event.get("parameters", []):
         if "name" in item and "value" in item:
-            params[item["name"]] = item["value"]
+            params[item["name"]] = _coerce_property_value(item.get("type"), item["value"])
 
     return params
 

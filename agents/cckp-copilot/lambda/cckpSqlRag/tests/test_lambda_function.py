@@ -14,6 +14,7 @@ from unittest.mock import patch
 import pytest
 
 from lambda_function import (
+    _coerce_property_value,
     _make_response,
     _parse_bundle,
     _resolve_table,
@@ -141,6 +142,60 @@ class TestExtractParams:
             {"name": "table", "value": "datasets"},
         ])
         assert extract_params(event) == {"table": "datasets"}
+
+    def test_array_typed_value_decoded_from_json_string(self):
+        # Real Bedrock requestBody events deliver array-typed values as a
+        # JSON-encoded string, not a native list (confirmed via AWS docs —
+        # see _coerce_property_value's docstring).
+        event = _api_event("/check-restriction", [
+            {"name": "ids", "type": "array", "value": '["syn1", "syn2"]'},
+        ])
+        assert extract_params(event) == {"ids": ["syn1", "syn2"]}
+
+    def test_array_typed_value_decoded_from_malformed_pseudo_json(self):
+        event = _api_event("/explore-url", [
+            {"name": "searchExpressions", "type": "array", "value": "[breast cancer, RNA sequencing]"},
+        ])
+        assert extract_params(event) == {
+            "searchExpressions": ["breast cancer", "RNA sequencing"],
+        }
+
+    def test_object_array_typed_value_decoded(self):
+        facets_json = json.dumps([{"columnName": "species", "values": ["Zebrafish"]}])
+        event = _api_event("/explore-url", [
+            {"name": "facets", "type": "array", "value": facets_json},
+        ])
+        assert extract_params(event) == {
+            "facets": [{"columnName": "species", "values": ["Zebrafish"]}],
+        }
+
+    def test_scalar_typed_value_left_alone(self):
+        event = _api_event("/sql-query", [
+            {"name": "table", "type": "string", "value": "datasets"},
+        ])
+        assert extract_params(event) == {"table": "datasets"}
+
+    def test_array_value_already_a_list_passes_through(self):
+        # Direct/synthetic invocations (and possibly future correctly-typed
+        # Bedrock behavior) may hand over a real list already — must not be
+        # altered.
+        event = _api_event("/explore-url", [
+            {"name": "searchExpressions", "type": "array", "value": ["glioma"]},
+        ])
+        assert extract_params(event) == {"searchExpressions": ["glioma"]}
+
+
+class TestCoercePropertyValue:
+    def test_non_array_object_type_passthrough(self):
+        assert _coerce_property_value("string", "[not, touched]") == "[not, touched]"
+
+    def test_empty_bracket_array(self):
+        assert _coerce_property_value("array", "[]") == []
+
+    def test_unparseable_non_bracketed_string_returned_as_is(self):
+        # Not valid JSON and not bracketed — nothing safe to do; let the
+        # caller's own validation produce a clear error instead of guessing.
+        assert _coerce_property_value("array", "not a list at all") == "not a list at all"
 
 
 # ---------------------------------------------------------------------------
@@ -721,6 +776,26 @@ class TestCheckRestriction:
         resp = lambda_handler(_function_event("checkRestriction"), None)
         assert _body(resp) == {"error": "ids is required"}
 
+    @patch("lambda_function._request")
+    def test_bracketed_pseudo_json_ids_from_real_requestBody_event(self, mock_request):
+        # Bedrock's real requestBody event delivers array-typed values as a
+        # string — sometimes malformed pseudo-JSON like "[syn1, syn2]"
+        # (unquoted) rather than valid JSON. Before extract_params decoded
+        # this, the old comma-split fallback would corrupt it into
+        # ["[syn1", "syn2]"] silently, with no error at all.
+        mock_request.return_value = (200, {"restrictionInformation": [
+            {"objectId": 1, "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False},
+            {"objectId": 2, "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False},
+        ]})
+        event = _api_event("/check-restriction", [
+            {"name": "ids", "type": "array", "value": "[syn1, syn2]"},
+        ])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert set(body["restrictions"]) == {"syn1", "syn2"}
+        sent_body = mock_request.call_args.args[2]
+        assert sent_body == {"restrictableObjectType": "ENTITY", "objectIds": ["syn1", "syn2"]}
+
 
 # ---------------------------------------------------------------------------
 # build_explore_url
@@ -856,3 +931,61 @@ class TestBuildExploreUrl:
         assert body["url"].startswith("/Explore/Publications/?qw0=")
         query = _decode_qw0(body["url"])
         assert query["sql"] == f"SELECT * FROM {TABLES['publications']}"
+
+    def test_search_expressions_from_real_requestBody_clean_json(self):
+        # Bedrock's real requestBody event delivers array-typed values as a
+        # JSON-encoded string, not a native list — this is the well-formed
+        # case.
+        event = _api_event("/explore-url", [
+            {"name": "table", "type": "string", "value": "publications"},
+            {"name": "searchExpressions", "type": "array", "value": '["glioma", "single cell RNA sequencing"]'},
+        ])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert "error" not in body
+        query = _decode_qw0(body["url"])
+        assert [f["searchExpression"] for f in query["additionalFilters"]] == [
+            "glioma", "single cell RNA sequencing",
+        ]
+
+    def test_search_expressions_from_real_requestBody_malformed_pseudo_json(self):
+        # Reproduces the exact failure from a live dev-agent trace: Bedrock
+        # sent searchExpressions as the literal string
+        # "[breast cancer, RNA sequencing]" — bracketed but with unquoted,
+        # comma-separated scalars, not valid JSON. Before extract_params
+        # decoded this, build_explore_url received that raw string and
+        # rejected it every retry with "searchExpressions must be a list of
+        # strings," regardless of how many times the model retried with the
+        # same (from its perspective, correct) input.
+        event = _api_event("/explore-url", [
+            {"name": "table", "type": "string", "value": "datasets"},
+            {"name": "searchExpressions", "type": "array", "value": "[breast cancer, RNA sequencing]"},
+        ])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert "error" not in body
+        query = _decode_qw0(body["url"])
+        assert [f["searchExpression"] for f in query["additionalFilters"]] == [
+            "breast cancer", "RNA sequencing",
+        ]
+
+    def test_facets_from_real_requestBody_json_string(self):
+        # Reproduces the second failure from the same live trace: facets
+        # arrived as a syntactically-valid JSON string that was never
+        # decoded, so `for facet in facets:` iterated individual characters
+        # of the string and `char.get(...)` raised
+        # "'str' object has no attribute 'get'".
+        facets_json = json.dumps([
+            {"columnName": "tumorType", "values": ["Breast Carcinoma", "Breast Adenocarcinoma"]},
+            {"columnName": "assay", "values": ["RNA Sequencing", "Single Cell RNA-Sequencing"]},
+        ])
+        event = _api_event("/explore-url", [
+            {"name": "table", "type": "string", "value": "datasets"},
+            {"name": "facets", "type": "array", "value": facets_json},
+        ])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert "error" not in body
+        query = _decode_qw0(body["url"])
+        assert query["selectedFacets"][0]["columnName"] == "tumorType"
+        assert query["selectedFacets"][1]["facetValues"] == ["RNA Sequencing", "Single Cell RNA-Sequencing"]
