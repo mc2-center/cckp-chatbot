@@ -1,8 +1,11 @@
+import base64
+import gzip
 import json
 import os
 import socket
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any, Dict, Optional
 
@@ -26,6 +29,17 @@ TABLES = {
     "tools": "syn26127427",
     "grants": "syn21918972",
     "education": "syn51497305",
+}
+
+# Portal Explore path segment per table alias. "education" has a literal
+# space — confirmed against the live site's own nav tab href
+# ("/Explore/Educational Resources"), not "EducationalResources".
+RESOURCE_PATHS = {
+    "datasets": "Datasets",
+    "publications": "Publications",
+    "tools": "Tools",
+    "grants": "Grants",
+    "education": "Educational Resources",
 }
 
 # partMask bits (Synapse): query results = 0x1, count = 0x2, select columns = 0x4
@@ -91,6 +105,8 @@ def lambda_handler(event, context):
 
         if function == "sqlQuery":
             response_body = sql_query(params)
+        elif function == "buildExploreUrl":
+            response_body = build_explore_url(params)
         elif function == "getColumns":
             response_body = get_columns_fn(params)
         elif function == "countByType":
@@ -130,6 +146,7 @@ def lambda_handler(event, context):
 def map_api_path_to_function(api_path: str) -> Optional[str]:
     mapping = {
         "/sql-query": "sqlQuery",
+        "/explore-url": "buildExploreUrl",
         "/columns": "getColumns",
         "/count-by-type": "countByType",
         "/dataset-files": "getDatasetFiles",
@@ -137,6 +154,37 @@ def map_api_path_to_function(api_path: str) -> Optional[str]:
         "/check-restriction": "checkRestriction",
     }
     return mapping.get(api_path)
+
+
+def _coerce_property_value(declared_type: Optional[str], value: Any) -> Any:
+    """Decode a Bedrock action-group property value into a real Python type.
+
+    Bedrock always sends `value` as a string in the Lambda invocation event,
+    even for properties whose OpenAPI schema declares `type: array` or
+    `type: object` — confirmed via AWS's own docs for the action-group
+    Lambda input event (agents-lambda.html), which show every `properties`
+    entry as `{"name": "string", "type": "string", "value": "string"}` with
+    no exception for non-scalar types.
+
+    Worse, array values sometimes arrive as malformed pseudo-JSON — bracketed
+    but with bare, unquoted, comma-separated scalars, e.g.
+    "[breast cancer, RNA sequencing]" instead of valid JSON
+    '["breast cancer", "RNA sequencing"]' — a quirk also independently
+    reported on AWS re:Post, not something specific to this Lambda. A plain
+    `json.loads` alone doesn't cover that case, so this falls back to a
+    manual bracket/comma parse when JSON decoding fails.
+    """
+    if declared_type not in ("array", "object") or not isinstance(value, str):
+        return value
+    text = value.strip()
+    try:
+        return json.loads(text)
+    except (ValueError, TypeError):
+        pass
+    if declared_type == "array" and text.startswith("[") and text.endswith("]"):
+        inner = text[1:-1].strip()
+        return [item.strip() for item in inner.split(",")] if inner else []
+    return value
 
 
 def extract_params(event: Dict[str, Any]) -> Dict[str, Any]:
@@ -148,11 +196,11 @@ def extract_params(event: Dict[str, Any]) -> Dict[str, Any]:
     params: Dict[str, Any] = {}
     for prop in properties:
         if "name" in prop and "value" in prop:
-            params[prop["name"]] = prop["value"]
+            params[prop["name"]] = _coerce_property_value(prop.get("type"), prop["value"])
 
     for item in event.get("parameters", []):
         if "name" in item and "value" in item:
-            params[item["name"]] = item["value"]
+            params[item["name"]] = _coerce_property_value(item.get("type"), item["value"])
 
     return params
 
@@ -264,6 +312,117 @@ def sql_query(params: Dict[str, Any]) -> Dict[str, Any]:
     limit = _clamp_limit(params.get("limit", DEFAULT_LIMIT))
     bundle = _run_query(syn_id, sql, limit, PART_RESULTS | PART_COUNT)
     return _parse_bundle(bundle)
+
+
+def build_explore_url(params: Dict[str, Any]) -> Dict[str, Any]:
+    """Build a working CCKP portal Explore path, optionally pre-filtered.
+
+    The portal's Explore pages read search/filter state from a `qw0` query
+    param: gzip-compressed, base64-encoded, URL-encoded JSON. This can't be
+    produced by an LLM as generated text (gzip is a binary format with
+    checksums), so it's computed here instead — the caller gets back a
+    ready-to-use path and should use it verbatim as a redirect target, no
+    further assembly needed.
+
+    Returns a *relative* path (e.g. "/Explore/Datasets/?qw0=..."), matching
+    every other redirect target this agent has ever used — a plain literal
+    Collection/Detail Page path is always relative, never a full URL with a
+    domain. An earlier version of this function returned an absolute URL
+    (with the https://... domain prefix), which broke redirects in
+    practice: the chat frontend's redirect handler expects `<target>` to be
+    a path it resolves against its own base URL, not an already-absolute
+    URL to use as-is.
+
+    IMPORTANT: the portal ignores any custom WHERE clause placed in the
+    `sql` field of this query object — confirmed by live-testing against
+    staging.cancercomplexity.synapse.org. It always reconstructs its own
+    query from `additionalFilters` (free-text search) and `selectedFacets`
+    (exact-value column filters), so filtering here must go through
+    `searchExpressions`/`facets`, not a hand-written SQL WHERE clause. The
+    `sql` this function sends is always the bare `SELECT * FROM {tableId}`.
+
+    `searchExpressions` is a list, not a single string: each entry becomes
+    its own independent `TextMatchesQueryFilter`, rendered by the portal as
+    a separate, independently-removable filter chip and AND'd together —
+    confirmed live against staging. Passing ["glioma", "single cell RNA
+    sequencing"] produces two chips ("glioma" and "single cell RNA
+    sequencing"); this is different from passing one merged string
+    ("glioma single cell RNA sequencing"), which produces a single chip
+    searched as one phrase.
+
+    `table` must be one of the 5 known aliases (not a raw synId) since the
+    Explore path segment is derived from it, not just the table's synId.
+    """
+    table = params.get("table")
+    if not table:
+        return {"error": "table is required"}
+    if table not in RESOURCE_PATHS:
+        return {
+            "error": (
+                f"Unknown table alias {table!r} for URL building. Use one "
+                f"of: {', '.join(RESOURCE_PATHS)} (a raw synId can't be "
+                "mapped to an Explore path)."
+            )
+        }
+
+    syn_id = TABLES[table]
+
+    query: Dict[str, Any] = {
+        "sql": f"SELECT * FROM {syn_id}",
+        "includeEntityEtag": False,
+        "isConsistent": True,
+    }
+
+    search_expressions = params.get("searchExpressions")
+    if search_expressions:
+        if not isinstance(search_expressions, list):
+            return {"error": "searchExpressions must be a list of strings"}
+        additional_filters = []
+        for expression in search_expressions:
+            if not expression or not isinstance(expression, str):
+                return {"error": "each searchExpressions entry must be a non-empty string"}
+            additional_filters.append({
+                "concreteType": "org.sagebionetworks.repo.model.table.TextMatchesQueryFilter",
+                "searchExpression": expression,
+                "searchMode": "NATURAL_LANGUAGE",
+            })
+        query["additionalFilters"] = additional_filters
+
+    facets = params.get("facets")
+    if facets:
+        selected_facets = []
+        for facet in facets:
+            column_name = facet.get("columnName")
+            values = facet.get("values")
+            if not column_name or not values:
+                return {"error": "each facet requires columnName and values"}
+            selected_facets.append({
+                "concreteType": "org.sagebionetworks.repo.model.table.FacetColumnValuesRequest",
+                "columnName": column_name,
+                "facetValues": values,
+            })
+        query["selectedFacets"] = selected_facets
+
+    payload = json.dumps(query, separators=(",", ":")).encode("utf-8")
+    compressed = gzip.compress(payload)
+    qw0 = urllib.parse.quote(base64.b64encode(compressed).decode("ascii"))
+
+    # Self-verify before returning: decode our own qw0 back to the query we
+    # just built. This only catches a bug in this function's own encoding
+    # (e.g. a future change to the gzip/base64/urlencode steps) — it can't
+    # catch the model mangling the string afterward, since that happens
+    # downstream of this return value. Still worth doing: better to return
+    # an explicit error here than a URL that silently doesn't work.
+    try:
+        roundtrip = json.loads(gzip.decompress(base64.b64decode(urllib.parse.unquote(qw0))))
+    except Exception as e:
+        return {"error": f"internal error: qw0 failed to self-verify ({e})"}
+    if roundtrip != query:
+        return {"error": "internal error: qw0 self-verification mismatch"}
+
+    path_segment = urllib.parse.quote(RESOURCE_PATHS[table])
+    url = f"/Explore/{path_segment}/?qw0={qw0}"
+    return {"url": url}
 
 
 def get_columns_fn(params: Dict[str, Any]) -> Dict[str, Any]:

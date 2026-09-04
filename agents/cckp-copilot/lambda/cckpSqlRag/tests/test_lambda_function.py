@@ -3,21 +3,41 @@
 All Synapse network calls are mocked so no live token/endpoint is needed.
 """
 
+import base64
+import gzip
 import json
 import socket
 import urllib.error
+import urllib.parse
 from unittest.mock import patch
 
 import pytest
 
 from lambda_function import (
+    _coerce_property_value,
     _make_response,
     _parse_bundle,
     _resolve_table,
+    build_explore_url,
     extract_params,
     lambda_handler,
+    RESOURCE_PATHS,
     TABLES,
 )
+
+
+def _decode_qw0(url):
+    """Reverse the gzip+base64+urlencode round-trip to inspect the query object."""
+    qw0 = url.split("qw0=", 1)[1]
+    raw = base64.b64decode(urllib.parse.unquote(qw0))
+    return json.loads(gzip.decompress(raw))
+
+
+# Precomputed at import time — deliberately the "wrong" payload for
+# TestBuildExploreUrl.test_self_verification_catches_encoding_bug. Must be
+# computed before that test's @patch("lambda_function.gzip.compress") is
+# active, since that patch replaces the real gzip.compress process-wide.
+_WRONG_COMPRESSED_PAYLOAD = gzip.compress(b'{"not": "the real query"}')
 
 
 # ---------------------------------------------------------------------------
@@ -122,6 +142,60 @@ class TestExtractParams:
             {"name": "table", "value": "datasets"},
         ])
         assert extract_params(event) == {"table": "datasets"}
+
+    def test_array_typed_value_decoded_from_json_string(self):
+        # Real Bedrock requestBody events deliver array-typed values as a
+        # JSON-encoded string, not a native list (confirmed via AWS docs —
+        # see _coerce_property_value's docstring).
+        event = _api_event("/check-restriction", [
+            {"name": "ids", "type": "array", "value": '["syn1", "syn2"]'},
+        ])
+        assert extract_params(event) == {"ids": ["syn1", "syn2"]}
+
+    def test_array_typed_value_decoded_from_malformed_pseudo_json(self):
+        event = _api_event("/explore-url", [
+            {"name": "searchExpressions", "type": "array", "value": "[breast cancer, RNA sequencing]"},
+        ])
+        assert extract_params(event) == {
+            "searchExpressions": ["breast cancer", "RNA sequencing"],
+        }
+
+    def test_object_array_typed_value_decoded(self):
+        facets_json = json.dumps([{"columnName": "species", "values": ["Zebrafish"]}])
+        event = _api_event("/explore-url", [
+            {"name": "facets", "type": "array", "value": facets_json},
+        ])
+        assert extract_params(event) == {
+            "facets": [{"columnName": "species", "values": ["Zebrafish"]}],
+        }
+
+    def test_scalar_typed_value_left_alone(self):
+        event = _api_event("/sql-query", [
+            {"name": "table", "type": "string", "value": "datasets"},
+        ])
+        assert extract_params(event) == {"table": "datasets"}
+
+    def test_array_value_already_a_list_passes_through(self):
+        # Direct/synthetic invocations (and possibly future correctly-typed
+        # Bedrock behavior) may hand over a real list already — must not be
+        # altered.
+        event = _api_event("/explore-url", [
+            {"name": "searchExpressions", "type": "array", "value": ["glioma"]},
+        ])
+        assert extract_params(event) == {"searchExpressions": ["glioma"]}
+
+
+class TestCoercePropertyValue:
+    def test_non_array_object_type_passthrough(self):
+        assert _coerce_property_value("string", "[not, touched]") == "[not, touched]"
+
+    def test_empty_bracket_array(self):
+        assert _coerce_property_value("array", "[]") == []
+
+    def test_unparseable_non_bracketed_string_returned_as_is(self):
+        # Not valid JSON and not bracketed — nothing safe to do; let the
+        # caller's own validation produce a clear error instead of guessing.
+        assert _coerce_property_value("array", "not a list at all") == "not a list at all"
 
 
 # ---------------------------------------------------------------------------
@@ -701,3 +775,217 @@ class TestCheckRestriction:
     def test_missing_ids(self):
         resp = lambda_handler(_function_event("checkRestriction"), None)
         assert _body(resp) == {"error": "ids is required"}
+
+    @patch("lambda_function._request")
+    def test_bracketed_pseudo_json_ids_from_real_requestBody_event(self, mock_request):
+        # Bedrock's real requestBody event delivers array-typed values as a
+        # string — sometimes malformed pseudo-JSON like "[syn1, syn2]"
+        # (unquoted) rather than valid JSON. Before extract_params decoded
+        # this, the old comma-split fallback would corrupt it into
+        # ["[syn1", "syn2]"] silently, with no error at all.
+        mock_request.return_value = (200, {"restrictionInformation": [
+            {"objectId": 1, "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False},
+            {"objectId": 2, "restrictionLevel": "OPEN", "hasUnmetAccessRequirement": False},
+        ]})
+        event = _api_event("/check-restriction", [
+            {"name": "ids", "type": "array", "value": "[syn1, syn2]"},
+        ])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert set(body["restrictions"]) == {"syn1", "syn2"}
+        sent_body = mock_request.call_args.args[2]
+        assert sent_body == {"restrictableObjectType": "ENTITY", "objectIds": ["syn1", "syn2"]}
+
+
+# ---------------------------------------------------------------------------
+# build_explore_url
+# ---------------------------------------------------------------------------
+
+class TestBuildExploreUrl:
+    def test_unfiltered_url(self):
+        result = build_explore_url({"table": "datasets"})
+        assert result["url"].startswith("/Explore/Datasets/?qw0=")
+        query = _decode_qw0(result["url"])
+        assert query == {
+            "sql": f"SELECT * FROM {TABLES['datasets']}",
+            "includeEntityEtag": False,
+            "isConsistent": True,
+        }
+
+    def test_search_expression_becomes_additional_filters(self):
+        result = build_explore_url({"table": "datasets", "searchExpressions": ["glioma"]})
+        query = _decode_qw0(result["url"])
+        assert query["additionalFilters"] == [{
+            "concreteType": "org.sagebionetworks.repo.model.table.TextMatchesQueryFilter",
+            "searchExpression": "glioma",
+            "searchMode": "NATURAL_LANGUAGE",
+        }]
+        assert "selectedFacets" not in query
+
+    def test_multiple_search_expressions_become_independent_filters(self):
+        # Confirmed live against staging: each entry renders as its own
+        # separate, independently-removable filter chip, AND'd together —
+        # distinct from merging them into one string, which searches as a
+        # single phrase instead.
+        result = build_explore_url({
+            "table": "publications",
+            "searchExpressions": ["glioma", "single cell RNA sequencing"],
+        })
+        query = _decode_qw0(result["url"])
+        assert query["additionalFilters"] == [
+            {
+                "concreteType": "org.sagebionetworks.repo.model.table.TextMatchesQueryFilter",
+                "searchExpression": "glioma",
+                "searchMode": "NATURAL_LANGUAGE",
+            },
+            {
+                "concreteType": "org.sagebionetworks.repo.model.table.TextMatchesQueryFilter",
+                "searchExpression": "single cell RNA sequencing",
+                "searchMode": "NATURAL_LANGUAGE",
+            },
+        ]
+
+    def test_search_expressions_must_be_a_list(self):
+        result = build_explore_url({"table": "datasets", "searchExpressions": "glioma"})
+        assert result == {"error": "searchExpressions must be a list of strings"}
+
+    def test_search_expressions_rejects_empty_entry(self):
+        result = build_explore_url({"table": "datasets", "searchExpressions": ["glioma", ""]})
+        assert result == {"error": "each searchExpressions entry must be a non-empty string"}
+
+    def test_facets_become_selected_facets(self):
+        result = build_explore_url({
+            "table": "datasets",
+            "facets": [{"columnName": "species", "values": ["Zebrafish"]}],
+        })
+        query = _decode_qw0(result["url"])
+        assert query["selectedFacets"] == [{
+            "concreteType": "org.sagebionetworks.repo.model.table.FacetColumnValuesRequest",
+            "columnName": "species",
+            "facetValues": ["Zebrafish"],
+        }]
+        assert "additionalFilters" not in query
+
+    def test_multiple_facets(self):
+        result = build_explore_url({
+            "table": "datasets",
+            "facets": [
+                {"columnName": "species", "values": ["Human"]},
+                {"columnName": "tumorType", "values": ["Glioma", "Glioblastoma"]},
+            ],
+        })
+        query = _decode_qw0(result["url"])
+        assert len(query["selectedFacets"]) == 2
+        assert query["selectedFacets"][1]["facetValues"] == ["Glioma", "Glioblastoma"]
+
+    def test_education_path_has_literal_space(self):
+        result = build_explore_url({"table": "education"})
+        assert result["url"].startswith("/Explore/Educational%20Resources/")
+        assert RESOURCE_PATHS["education"] == "Educational Resources"
+
+    def test_url_is_relative_not_absolute(self):
+        # A prior version returned an absolute URL (with the https://...
+        # domain), which broke the chat frontend's redirect handling — it
+        # resolves <target> against its own base URL, same as every other
+        # literal Collection/Detail Page target this agent uses.
+        result = build_explore_url({"table": "datasets"})
+        assert not result["url"].startswith("http")
+
+    def test_missing_table(self):
+        assert build_explore_url({}) == {"error": "table is required"}
+
+    @patch("lambda_function.gzip.compress")
+    def test_self_verification_catches_encoding_bug(self, mock_compress):
+        # Simulate a future regression in the encode step (e.g. compressing
+        # the wrong bytes) — self-verification must catch it and return an
+        # error rather than a URL that silently doesn't work.
+        mock_compress.return_value = _WRONG_COMPRESSED_PAYLOAD
+        result = build_explore_url({"table": "datasets"})
+        assert result == {"error": "internal error: qw0 self-verification mismatch"}
+
+    def test_self_verification_passes_for_real_output(self):
+        # The success-path counterpart: real output must NOT trip the check.
+        result = build_explore_url({"table": "datasets", "searchExpressions": ["glioma"]})
+        assert "error" not in result
+        assert "url" in result
+
+    def test_raw_synid_rejected(self):
+        result = build_explore_url({"table": TABLES["datasets"]})
+        assert "error" in result
+        assert "datasets" in result["error"]  # names a valid alias instead
+
+    def test_facet_missing_values_errors(self):
+        result = build_explore_url({
+            "table": "datasets",
+            "facets": [{"columnName": "species"}],
+        })
+        assert result == {"error": "each facet requires columnName and values"}
+
+    def test_via_lambda_handler(self):
+        event = _function_event("buildExploreUrl", [
+            {"name": "table", "value": "publications"},
+            {"name": "searchExpressions", "value": ["glioma"]},
+        ])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert body["url"].startswith("/Explore/Publications/?qw0=")
+        query = _decode_qw0(body["url"])
+        assert query["sql"] == f"SELECT * FROM {TABLES['publications']}"
+
+    def test_search_expressions_from_real_requestBody_clean_json(self):
+        # Bedrock's real requestBody event delivers array-typed values as a
+        # JSON-encoded string, not a native list — this is the well-formed
+        # case.
+        event = _api_event("/explore-url", [
+            {"name": "table", "type": "string", "value": "publications"},
+            {"name": "searchExpressions", "type": "array", "value": '["glioma", "single cell RNA sequencing"]'},
+        ])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert "error" not in body
+        query = _decode_qw0(body["url"])
+        assert [f["searchExpression"] for f in query["additionalFilters"]] == [
+            "glioma", "single cell RNA sequencing",
+        ]
+
+    def test_search_expressions_from_real_requestBody_malformed_pseudo_json(self):
+        # Reproduces the exact failure from a live dev-agent trace: Bedrock
+        # sent searchExpressions as the literal string
+        # "[breast cancer, RNA sequencing]" — bracketed but with unquoted,
+        # comma-separated scalars, not valid JSON. Before extract_params
+        # decoded this, build_explore_url received that raw string and
+        # rejected it every retry with "searchExpressions must be a list of
+        # strings," regardless of how many times the model retried with the
+        # same (from its perspective, correct) input.
+        event = _api_event("/explore-url", [
+            {"name": "table", "type": "string", "value": "datasets"},
+            {"name": "searchExpressions", "type": "array", "value": "[breast cancer, RNA sequencing]"},
+        ])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert "error" not in body
+        query = _decode_qw0(body["url"])
+        assert [f["searchExpression"] for f in query["additionalFilters"]] == [
+            "breast cancer", "RNA sequencing",
+        ]
+
+    def test_facets_from_real_requestBody_json_string(self):
+        # Reproduces the second failure from the same live trace: facets
+        # arrived as a syntactically-valid JSON string that was never
+        # decoded, so `for facet in facets:` iterated individual characters
+        # of the string and `char.get(...)` raised
+        # "'str' object has no attribute 'get'".
+        facets_json = json.dumps([
+            {"columnName": "tumorType", "values": ["Breast Carcinoma", "Breast Adenocarcinoma"]},
+            {"columnName": "assay", "values": ["RNA Sequencing", "Single Cell RNA-Sequencing"]},
+        ])
+        event = _api_event("/explore-url", [
+            {"name": "table", "type": "string", "value": "datasets"},
+            {"name": "facets", "type": "array", "value": facets_json},
+        ])
+        resp = lambda_handler(event, None)
+        body = _body(resp)
+        assert "error" not in body
+        query = _decode_qw0(body["url"])
+        assert query["selectedFacets"][0]["columnName"] == "tumorType"
+        assert query["selectedFacets"][1]["facetValues"] == ["RNA Sequencing", "Single Cell RNA-Sequencing"]
