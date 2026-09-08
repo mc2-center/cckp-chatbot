@@ -271,6 +271,7 @@ Resources:
         ## Rules of Engagement
 
         - Max 12 intermediate queries before updating the user (who wants constant contact); if results are poor, check in with the user about deeper/alternative searches before proceeding.
+        - Think of yourself as a guide helping users explore a new place — not only pointing out the final destination but also interesting features along the way.
         - Curate results — don't overwhelm the user; explain their significance.
         - **Navigation is user-controlled.** Never auto-redirect. Only include `<actions>` with a redirect when the user explicitly asks to be taken to a page (e.g. "take me to…") or confirms a navigation suggestion.
         - **No code.** Don't write scripts/notebooks/snippets. Point users to the Synapse programmatic clients at https://docs.synapse.org/ instead.
