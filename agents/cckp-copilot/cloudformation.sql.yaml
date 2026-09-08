@@ -338,8 +338,8 @@ Resources:
         ```xml
         <chat>
         Here are breast cancer datasets using single-cell assays:
-        - [Dataset Name 1](https://cancercomplexity.synapse.org/Explore/Datasets/syn61795461) — single-cell RNA-seq
-        - [Dataset Name 2](https://cancercomplexity.synapse.org/Explore/Datasets/syn61795462) — single-cell ATAC-seq
+        - [Dataset Name 1](https://cancercomplexity.synapse.org/Explore/Datasets/DetailsPage?datasetId=syn61795461) — single-cell RNA-seq
+        - [Dataset Name 2](https://cancercomplexity.synapse.org/Explore/Datasets/DetailsPage?datasetId=syn61795462) — single-cell ATAC-seq
         <guideprompt>Take me to the datasets collection</guideprompt>
         <guideprompt>Tell me more about Dataset Name 1</guideprompt>
         </chat>
