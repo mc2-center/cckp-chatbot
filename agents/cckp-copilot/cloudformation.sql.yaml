@@ -419,6 +419,9 @@ Resources:
                       a `<query>` redirect block — a custom SQL WHERE clause embedded in a
                       redirect is silently ignored by the portal (confirmed live); only
                       `searchExpressions` and `facets` actually filter results.
+                      `searchExpressions` does not reliably AND multiple entries
+                      (verified to behave like an OR/union instead) — use `facets`
+                      to combine >=2 concepts into a true intersection.
                     requestBody:
                       required: true
                       content:
@@ -430,16 +433,20 @@ Resources:
                               value:
                                 table: datasets
                                 searchExpressions: [glioma]
-                            combinedFreeTextSearch:
-                              value:
-                                table: publications
-                                searchExpressions: [glioma, single cell RNA sequencing]
                             facetFilter:
                               value:
                                 table: datasets
                                 facets:
                                   - columnName: species
                                     values: ["Zebrafish"]
+                            combinedFacetFilter:
+                              value:
+                                table: publications
+                                facets:
+                                  - columnName: tumorType
+                                    values: ["Glioma"]
+                                  - columnName: assay
+                                    values: ["Cyclic Immunofluorescence"]
                     responses:
                       "200":
                         description: The ready-to-use Explore URL, or an application-level error payload
@@ -617,12 +624,14 @@ Resources:
                           type: string
                         description: >
                           Optional list of free-text search terms. Each entry becomes its
-                          own independent, natural-language TextMatchesQueryFilter,
-                          rendered by the portal as a separate, independently-removable
-                          filter chip and AND'd together (confirmed live). Use one entry
-                          per distinct concept — e.g. ["glioma", "single cell RNA
-                          sequencing"] for two combined filters — rather than merging them
-                          into one string, which searches as a single phrase instead.
+                          own independent TextMatchesQueryFilter, rendered by the portal
+                          as a separate, independently-removable filter chip. Multiple
+                          entries do NOT reliably AND — live-testing found they behave
+                          like an OR/union instead (e.g. two independent terms with 230
+                          and 1,273 results alone combined to 1,449, only possible as a
+                          union). Use a single entry for one free-text concept; for a
+                          true intersection of >=2 concepts, use `facets` instead
+                          (confirmed to AND correctly).
                       facets:
                         type: array
                         items:
