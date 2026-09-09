@@ -343,12 +343,33 @@ def build_explore_url(params: Dict[str, Any]) -> Dict[str, Any]:
 
     `searchExpressions` is a list, not a single string: each entry becomes
     its own independent `TextMatchesQueryFilter`, rendered by the portal as
-    a separate, independently-removable filter chip and AND'd together —
-    confirmed live against staging. Passing ["glioma", "single cell RNA
-    sequencing"] produces two chips ("glioma" and "single cell RNA
-    sequencing"); this is different from passing one merged string
-    ("glioma single cell RNA sequencing"), which produces a single chip
-    searched as one phrase.
+    a separate, independently-removable filter chip. Passing ["glioma",
+    "single cell RNA sequencing"] produces two chips ("glioma" and "single
+    cell RNA sequencing"); this is different from passing one merged
+    string ("glioma single cell RNA sequencing"), which produces a single
+    chip searched as one phrase.
+
+    IMPORTANT — multiple `searchExpressions` entries do NOT reliably AND.
+    An earlier version of this docstring claimed they did ("confirmed live
+    against staging"); that claim was never actually discriminating (see
+    plans/combined-filter-search-expressions.md's correction addendum) and
+    is wrong. Live-tested against *production*, two independent concepts
+    ("glioma": 230 results alone; "fluorescence microscopy": 1,273 alone)
+    combined to **1,449** results — more than either term alone, which is
+    only possible if the filters are OR'd/unioned, not intersected (230 +
+    1,273 − 1,449 ≈ 54 overlap, consistent with a union). This held
+    regardless of `searchMode` (`NATURAL_LANGUAGE` vs `BOOLEAN`) and
+    regardless of whether `+`-prefixed required-term operators were used,
+    as a single combined entry or as separate entries — all four shapes
+    produced the identical 1,449, meaning `searchMode`/operators aren't
+    honored for AND purposes on this deployment. For a filter that must
+    narrow to a true intersection of ≥2 concepts, use `facets` instead —
+    `selectedFacets` entries are confirmed to AND correctly (live-tested:
+    tumorType=["Glioma"] (108 alone) + assay=["Cyclic Immunofluorescence"]
+    (45 alone) → 1 result, a real intersection). Treat a multi-entry
+    `searchExpressions` result count as an upper bound, not a precise
+    filter, and default to `facets` whenever the concepts map to a
+    facetable column (see plans/fix-searchexpressions-and-semantics.md).
 
     `table` must be one of the 5 known aliases (not a raw synId) since the
     Explore path segment is derived from it, not just the table's synId.
