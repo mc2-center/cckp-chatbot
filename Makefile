@@ -116,6 +116,7 @@ deploy-sql-dev-stack:
 	$(AWS) cloudformation deploy \
 		--template-file $(SQL_TEMPLATE) \
 		--stack-name $(SQL_STACK_NAME_DEV) \
+		--s3-bucket $(S3_BUCKET) \
 		--parameter-overrides \
 			AgentName=$(SQL_AGENT_NAME_DEV) \
 			FoundationModelId=$(FOUNDATION_MODEL_ID) \
@@ -140,6 +141,7 @@ deploy-sql-prod-stack:
 	$(AWS) cloudformation deploy \
 		--template-file $(SQL_TEMPLATE) \
 		--stack-name $(SQL_STACK_NAME_PROD) \
+		--s3-bucket $(S3_BUCKET) \
 		--parameter-overrides \
 			AgentName=$(SQL_AGENT_NAME_PROD) \
 			FoundationModelId=$(FOUNDATION_MODEL_ID) \
@@ -168,6 +170,7 @@ deploy-sparql-dev-stack:
 	$(AWS) cloudformation deploy \
 		--template-file $(SPARQL_TEMPLATE) \
 		--stack-name $(SPARQL_STACK_NAME_DEV) \
+		--s3-bucket $(S3_BUCKET) \
 		--parameter-overrides \
 			AgentName=$(SPARQL_AGENT_NAME_DEV) \
 			FoundationModelId=$(FOUNDATION_MODEL_ID) \
@@ -194,6 +197,7 @@ deploy-sparql-prod-stack:
 	$(AWS) cloudformation deploy \
 		--template-file $(SPARQL_TEMPLATE) \
 		--stack-name $(SPARQL_STACK_NAME_PROD) \
+		--s3-bucket $(S3_BUCKET) \
 		--parameter-overrides \
 			AgentName=$(SPARQL_AGENT_NAME_PROD) \
 			FoundationModelId=$(FOUNDATION_MODEL_ID) \
