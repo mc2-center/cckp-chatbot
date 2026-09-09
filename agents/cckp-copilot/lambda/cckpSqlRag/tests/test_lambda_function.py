@@ -823,10 +823,14 @@ class TestBuildExploreUrl:
         assert "selectedFacets" not in query
 
     def test_multiple_search_expressions_become_independent_filters(self):
-        # Confirmed live against staging: each entry renders as its own
-        # separate, independently-removable filter chip, AND'd together —
-        # distinct from merging them into one string, which searches as a
-        # single phrase instead.
+        # Each entry renders as its own separate, independently-removable
+        # filter chip, distinct from merging them into one string (which
+        # searches as a single phrase instead). NOTE: this only asserts the
+        # *shape* built here — it does NOT mean the portal ANDs the chips
+        # together. Live-testing (see build_explore_url's docstring and
+        # plans/fix-searchexpressions-and-semantics.md) found multiple
+        # entries behave like an OR/union on this deployment, regardless of
+        # searchMode or `+` operators. Use `facets` for a true AND.
         result = build_explore_url({
             "table": "publications",
             "searchExpressions": ["glioma", "single cell RNA sequencing"],
