@@ -1,1 +1,404 @@
-[]
+[
+  {
+    "session_id": "grant-embargo-field",
+    "session_type": "MIXED",
+    "description": "Embargo field semantics from docs, then a live count of grants using it",
+    "n_turns": 2,
+    "turns": [
+      {
+        "id": "grant-embargo-field-t1",
+        "question": "What does the 'Embargo End Date' field on a Grant record indicate, and is it required for every grant?",
+        "expected": "DOCS",
+        "persona": "CONTRIBUTOR",
+        "notes": "Field semantics (optional, used only when an embargo applies) are defined in the MC2 Center Grant data model docs, not the resource backend."
+      },
+      {
+        "id": "grant-embargo-field-t2",
+        "question": "How many Grants currently have an Embargo End Date recorded?",
+        "expected": "RAG",
+        "persona": "CONTRIBUTOR",
+        "notes": "Live count over actual Grant records requires querying the resource backend; docs only define what the field means."
+      }
+    ]
+  },
+  {
+    "session_id": "controlled-access-example",
+    "session_type": "MIXED",
+    "description": "Access-tier policy questions, then a real example of a restricted dataset",
+    "n_turns": 3,
+    "turns": [
+      {
+        "id": "controlled-access-example-t1",
+        "question": "What's required to submit data that should be restricted to Controlled Access rather than open access?",
+        "expected": "DOCS",
+        "persona": "CONTRIBUTOR",
+        "notes": "Controlled Access requirements (access request or supporting documentation) are described in the Files and Metadata: Packaging and Release guide."
+      },
+      {
+        "id": "controlled-access-example-t2",
+        "question": "How is that different from Conditional Access?",
+        "expected": "DOCS",
+        "persona": "CONTRIBUTOR",
+        "notes": "The Conditional vs. Controlled Access distinction is a documented policy definition, not something that requires querying live data."
+      },
+      {
+        "id": "controlled-access-example-t3",
+        "question": "Can you show me a real example of a Controlled Access dataset on the CCKP?",
+        "expected": "RAG",
+        "persona": "CONTRIBUTOR",
+        "notes": "Surfacing a specific existing dataset and its restriction status requires the resource backend's dataset/file discovery and restriction-check capability, not the docs KB."
+      }
+    ]
+  },
+  {
+    "session_id": "tool-count-and-support",
+    "session_type": "MIXED",
+    "description": "Count of Tools, then whether the MC2 Center helps non-consortium researchers",
+    "n_turns": 2,
+    "turns": [
+      {
+        "id": "tool-count-and-support-t1",
+        "question": "How many Tools are listed on the CCKP?",
+        "expected": "RAG",
+        "persona": "REUSER",
+        "notes": "Current count requires querying the Tool resource table; docs won't have a live number."
+      },
+      {
+        "id": "tool-count-and-support-t2",
+        "question": "Does the MC2 Center give hands-on data storage and curation help to researchers who aren't part of a funded consortium?",
+        "expected": "DOCS",
+        "persona": "REUSER",
+        "notes": "The CCKP is free and open to browse, but direct MC2 Center support is reserved for consortia members — this scoping is documented policy, not something the resource backend would know."
+      }
+    ]
+  },
+  {
+    "session_id": "dataset-species-and-study-ranking",
+    "session_type": "MIXED",
+    "description": "Required Dataset fields from docs, then which Study has the most datasets",
+    "n_turns": 2,
+    "turns": [
+      {
+        "id": "dataset-species-and-study-ranking-t1",
+        "question": "Is species information required when submitting a Dataset record to the CCKP?",
+        "expected": "DOCS",
+        "persona": "CONTRIBUTOR",
+        "notes": "'Dataset Species' being a required field is defined in the Dataset data model reference."
+      },
+      {
+        "id": "dataset-species-and-study-ranking-t2",
+        "question": "Which Study on the CCKP has the most associated Datasets?",
+        "expected": "RAG",
+        "persona": "CONTRIBUTOR",
+        "notes": "Ranking studies by number of linked datasets requires aggregating over the resource backend."
+      }
+    ]
+  },
+  {
+    "session_id": "offtopic-then-download-docs",
+    "session_type": "MIXED",
+    "description": "Out-of-scope analysis request pivots to docs on programmatic downloads",
+    "n_turns": 2,
+    "turns": [
+      {
+        "id": "offtopic-then-download-docs-t1",
+        "question": "Can you help me write a script to analyze a dataset I found on the CCKP?",
+        "expected": "NONE",
+        "persona": "REUSER",
+        "notes": "Direct data analysis is out of scope; agent should decline and point toward download/programmatic-access guidance instead."
+      },
+      {
+        "id": "offtopic-then-download-docs-t2",
+        "question": "OK, can I at least download the data with Python or R instead of the web UI?",
+        "expected": "DOCS",
+        "persona": "REUSER",
+        "notes": "The Download CCKP Information guide documents command-line/Python/R programmatic download options."
+      }
+    ]
+  },
+  {
+    "session_id": "cancer-biology-basics",
+    "session_type": "NONE",
+    "description": "General background question about a cancer type",
+    "n_turns": 1,
+    "turns": [
+      {
+        "id": "cancer-biology-basics-t1",
+        "question": "hi, is glioblastoma a type of brain cancer?",
+        "expected": "NONE",
+        "persona": "X",
+        "notes": "General medical background answerable from model knowledge; no CCKP-specific lookup needed."
+      }
+    ]
+  },
+  {
+    "session_id": "data-contribution-steps",
+    "session_type": "DOCS",
+    "description": "Data contribution process for a new contributor",
+    "n_turns": 2,
+    "turns": [
+      {
+        "id": "data-contribution-steps-t1",
+        "question": "What are the steps to contribute data to the CCKP?",
+        "expected": "DOCS",
+        "persona": "CONTRIBUTOR",
+        "notes": "High-level contribution workflow; answer is entirely in the help docs (Initiating the Data Contribution & Sharing Process, High-Level Steps & Expectations)."
+      },
+      {
+        "id": "data-contribution-steps-t2",
+        "question": "What metadata fields are required when submitting a Dataset record?",
+        "expected": "DOCS",
+        "persona": "CONTRIBUTOR",
+        "notes": "Required-field definitions (e.g. Dataset Species) live in the data model reference docs, not the resource backend."
+      }
+    ]
+  },
+  {
+    "session_id": "tool-license-policy",
+    "session_type": "MIXED",
+    "description": "License field definition from docs, then actual license distribution from the backend",
+    "n_turns": 2,
+    "turns": [
+      {
+        "id": "tool-license-policy-t1",
+        "question": "What does the 'License' field on a Tool record represent?",
+        "expected": "DOCS",
+        "persona": "REUSER",
+        "notes": "Field definition (software/data usage license, e.g. Apache-2.0) is documented in the Tool data model reference; no need to query the resource backend."
+      },
+      {
+        "id": "tool-license-policy-t2",
+        "question": "What's the most common Tool license listed on the CCKP right now?",
+        "expected": "RAG",
+        "persona": "REUSER",
+        "notes": "Requires aggregating actual License values across Tool records; docs only describe what the field means, not the current distribution."
+      }
+    ]
+  },
+  {
+    "session_id": "visium-dataset-access-filtering",
+    "session_type": "RAG",
+    "description": "Exploring 10x Visium datasets with follow-up access and consortium filters",
+    "n_turns": 3,
+    "turns": [
+      {
+        "id": "visium-dataset-access-filtering-t1",
+        "question": "How many Datasets on the CCKP use 10x Visium spatial transcriptomics?",
+        "expected": "RAG",
+        "persona": "REUSER",
+        "notes": "Requires counting Dataset records by assay type in the resource backend; docs won't have current counts."
+      },
+      {
+        "id": "visium-dataset-access-filtering-t2",
+        "question": "Of those, which ones have no access restrictions?",
+        "expected": "RAG",
+        "persona": "REUSER",
+        "notes": "Filtering by restriction status uses the resource backend's dataset/file restriction-check capability."
+      },
+      {
+        "id": "visium-dataset-access-filtering-t3",
+        "question": "And which of those were contributed under the CSBC consortium?",
+        "expected": "RAG",
+        "persona": "REUSER",
+        "notes": "Follow-up filter by Grant Consortium Name; still a resource-backend query. Uses conversation context from the prior two turns."
+      }
+    ]
+  },
+  {
+    "session_id": "tumor-type-dataset-counts",
+    "session_type": "RAG",
+    "description": "Tumor-type dataset discovery for a specific cancer type",
+    "n_turns": 2,
+    "turns": [
+      {
+        "id": "tumor-type-dataset-counts-t1",
+        "question": "How many Datasets on the CCKP list glioblastoma as the tumor type?",
+        "expected": "RAG",
+        "persona": "FUNDER",
+        "notes": "Requires querying the resource backend for Dataset Tumor Type counts."
+      },
+      {
+        "id": "tumor-type-dataset-counts-t2",
+        "question": "What RNA-seq datasets are available for pancreatic cancer research?",
+        "expected": "RAG",
+        "persona": "REUSER",
+        "notes": "Dataset listing filtered by assay type and tumor type requires querying the resource backend."
+      }
+    ]
+  },
+  {
+    "session_id": "grant-embargo-to-browse",
+    "session_type": "MIXED",
+    "description": "Contributor asks about the embargo field again, then pivots to browsing public data",
+    "n_turns": 2,
+    "turns": [
+      {
+        "id": "grant-embargo-to-browse-t1",
+        "question": "Is the Embargo End Date field required on every Grant record?",
+        "expected": "DOCS",
+        "persona": "CONTRIBUTOR",
+        "notes": "Same documented field definition as in grant-embargo-field, phrased differently — tests routing consistency across repeated topics."
+      },
+      {
+        "id": "grant-embargo-to-browse-t2",
+        "question": "Take me to all the datasets that are currently publicly available on the CCKP",
+        "expected": "REDIRECT",
+        "persona": "REUSER",
+        "notes": "Navigation request; agent can redirect to a filtered Explore/Datasets page directly without querying any KB."
+      }
+    ]
+  },
+  {
+    "session_id": "individual-age-data-to-contribution",
+    "session_type": "MIXED",
+    "description": "Age-at-diagnosis count, then a pivot to contribution guidance and file size limits",
+    "n_turns": 3,
+    "turns": [
+      {
+        "id": "individual-age-data-to-contribution-t1",
+        "question": "How many Individuals in the CCKP data have an Age at Diagnosis under 18?",
+        "expected": "RAG",
+        "persona": "FUNDER",
+        "notes": "Requires querying Individual records for a numeric age-at-diagnosis threshold in the resource backend."
+      },
+      {
+        "id": "individual-age-data-to-contribution-t2",
+        "question": "I'd like to add my pediatric glioblastoma study data to the CCKP. What do I need to prepare?",
+        "expected": "DOCS",
+        "persona": "CONTRIBUTOR",
+        "notes": "Pivot to contribution guidance; clearly a documentation topic despite the prior resource-backend context."
+      },
+      {
+        "id": "individual-age-data-to-contribution-t3",
+        "question": "Is there a limit on how large my data files can be?",
+        "expected": "DOCS",
+        "persona": "CONTRIBUTOR",
+        "notes": "The FAQ describes MC2 Center support for datasets exceeding 6TB rather than a hard upload limit — this is a documented policy point, not a resource-backend query."
+      }
+    ]
+  },
+  {
+    "session_id": "pdx-model-systems",
+    "session_type": "MIXED",
+    "description": "Alternating docs and backend turns about preclinical model records",
+    "n_turns": 3,
+    "turns": [
+      {
+        "id": "pdx-model-systems-t1",
+        "question": "What types of preclinical models are represented in the CCKP data model?",
+        "expected": "BOTH",
+        "persona": "REUSER",
+        "notes": "Docs describe the Model entity's supported categories; the resource backend can enumerate which types are actually present. Either source gives a valid answer."
+      },
+      {
+        "id": "pdx-model-systems-t2",
+        "question": "How many patient-derived xenograft models are recorded right now?",
+        "expected": "RAG",
+        "persona": "REUSER",
+        "notes": "Current count requires querying the resource backend."
+      },
+      {
+        "id": "pdx-model-systems-t3",
+        "question": "How should I link one of these Model entries back to the human Individual it came from?",
+        "expected": "DOCS",
+        "persona": "REUSER",
+        "notes": "The correct field to use ('Individual Key', not 'Model Source') is a data-model documentation detail."
+      }
+    ]
+  },
+  {
+    "session_id": "glioblastoma-dataset-download",
+    "session_type": "BOTH",
+    "description": "Compound question requiring both sources",
+    "n_turns": 1,
+    "turns": [
+      {
+        "id": "glioblastoma-dataset-download-t1",
+        "question": "Can you walk me through downloading a real dataset on the CCKP, preferably one related to glioblastoma?",
+        "expected": "BOTH",
+        "persona": "REUSER",
+        "notes": "Two-part question: identifying a real existing dataset requires RAG; the download walkthrough itself is in DOCS."
+      }
+    ]
+  },
+  {
+    "session_id": "glioblastoma-research-overview",
+    "session_type": "BOTH",
+    "description": "Ambiguous overview query that could reasonably route to either source",
+    "n_turns": 2,
+    "turns": [
+      {
+        "id": "glioblastoma-research-overview-t1",
+        "question": "Tell me about glioblastoma research on the CCKP",
+        "expected": "BOTH",
+        "persona": "X",
+        "notes": "Vague overview question; agent might use docs for context or the resource backend for a data inventory. BOTH is acceptable."
+      },
+      {
+        "id": "glioblastoma-research-overview-t2",
+        "question": "Which clients are available for programmatic access to the data?",
+        "expected": "DOCS",
+        "persona": "REUSER",
+        "notes": "Available access methods (command line, Python, R via the Programmatically Downloading Data guide) are described in the docs."
+      }
+    ]
+  },
+  {
+    "session_id": "offtopic-multiturn",
+    "session_type": "NONE",
+    "description": "Off-topic or general requests that should not trigger any KB lookup",
+    "n_turns": 2,
+    "turns": [
+      {
+        "id": "offtopic-multiturn-t1",
+        "question": "Help me write a Python script to reverse a string",
+        "expected": "NONE",
+        "persona": "X",
+        "notes": "General programming question unrelated to the CCKP; no KB lookup needed."
+      },
+      {
+        "id": "offtopic-multiturn-t2",
+        "question": "OK, can you submit a support ticket on my behalf?",
+        "expected": "NONE",
+        "persona": "X",
+        "notes": "Requesting an action the assistant doesn't have."
+      }
+    ]
+  },
+  {
+    "session_id": "consortium-funder-overview",
+    "session_type": "MIXED",
+    "description": "Funder asking for consortium-level inventory counts and contact details",
+    "n_turns": 4,
+    "turns": [
+      {
+        "id": "consortium-funder-overview-t1",
+        "question": "How many CSBC-funded Datasets are currently on the CCKP?",
+        "expected": "RAG",
+        "persona": "FUNDER",
+        "notes": "Current inventory counts filtered by consortium require querying the resource backend."
+      },
+      {
+        "id": "consortium-funder-overview-t2",
+        "question": "I'm trying to get a complete picture of which NCI DCB programs have contributed data, beyond the ones already named in the docs",
+        "expected": "BOTH",
+        "persona": "FUNDER",
+        "notes": "Intentionally open-ended. A well-routing agent should consult the docs for named consortia (CSBC, PS-ON, TEC, CCBIR, MetNet, PDMC) and the resource backend to enumerate actual Grant Consortium Name values present. Neither source alone gives the complete picture."
+      },
+      {
+        "id": "consortium-funder-overview-t3",
+        "question": "Which consortium has contributed the most Grants?",
+        "expected": "RAG",
+        "persona": "FUNDER",
+        "notes": "Ranking consortia by grant count requires aggregating over the resource backend."
+      },
+      {
+        "id": "consortium-funder-overview-t4",
+        "question": "Who should I contact to discuss supporting the portal?",
+        "expected": "DOCS",
+        "persona": "FUNDER",
+        "notes": "Contact information (mc2center@sagebase.org / MC2 Center Help Desk) is in the Contact Us docs page; no resource-backend lookup needed."
+      }
+    ]
+  }
+]
