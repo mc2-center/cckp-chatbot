@@ -17,3 +17,8 @@ node_modules
 # docs site build output
 docs/public/
 docs/.hugo_build.lock
+
+# Lambda deployment packages built locally (e.g. via the Makefile's
+# deploy-*-lambda targets, or the manual steps in agents/README.md)
+agents/**/lambda/**/*.zip
+agents/**/lambda/**/tmp/
