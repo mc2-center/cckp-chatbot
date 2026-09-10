@@ -48,3 +48,19 @@ All four approach steps applied as planned, no deviations:
 
 - Re-parsed `cloudformation.sql.yaml` with the project's CFN-aware YAML loader: `Instruction` is now 13,106 chars (up from 11,835), comfortably under the ~20,000-char limit. The embedded `ApiSchema.Payload` (untouched by this change) still parses correctly.
 - No Lambda or OpenAPI schema changes were needed or made — this was an Instruction-text-only edit.
+
+### Addendum: production has since switched to the plain path-segment format — dual-environment distinction removed
+
+The user asked to re-verify whether production's `DetailsPage?key=value` format was still in use, since it may have been superseded by "`data_type/id`" path syntax. Live-tested all 5 resource types directly against **production** (`cancercomplexity.synapse.org`) by reading real result-card hrefs off rendered Explore pages (via JS `querySelectorAll('a')`, since some href values tripped the browser tool's base64-looking-content redaction — worked around by interleaving zero-width spaces into the returned strings to break the detection heuristic without altering the actual page content):
+
+| Resource | Real production href (confirmed live) |
+|---|---|
+| Datasets | `/Explore/Datasets/syn61795461` |
+| Publications | `/Explore/Publications/42151118` |
+| Tools | `/Explore/Tools/Pycashier`, `/Explore/Tools/Integrative%20Genomics%20Viewer` |
+| Grants | `/Explore/Grants/syn9775689` |
+| Educational Resources | `/Explore/Educational Resources/SOP%20Template` |
+
+All 5 match the plain path-segment form already documented for staging, byte-for-byte in shape (including the `%20` space-encoding, not `+`) — production has migrated away from the `DetailsPage?key=value` form this plan added. The dual-environment distinction this plan introduced is now stale and actively wrong: the Instruction's own worked example (fixed in a separate session to use the "Production Detail Page Link" column) was reproducing a URL shape that no longer exists on either environment.
+
+**Reverted to a single format.** In `agents/cckp-copilot/cloudformation.sql.yaml`: collapsed the table back to one `Detail Page Target` column (dropped the `Production Detail Page Link` column entirely), rewrote the intro sentence to state both environments were re-verified live and now share this format, simplified the "Redirect vs. present-to-user" rule to "same path, differing only in absoluteness" (dropping the format-choice logic, keeping only the pre-existing staging-vs-production *domain* choice for `<chat>` markdown links, which is unrelated to this format question and still applies), and fixed the worked example's Dataset links back to the plain path-segment form. No Lambda/OpenAPI changes (this table was never mirrored there). `Instruction` is now 14,355 chars (down from 15,149 before this simplification), still comfortably under the ~20,000-char limit. Full Lambda test suite re-run: 94/94 passing (unaffected — no Lambda changes). Re-parsed with the CFN-aware YAML loader: both the template and the embedded `ApiSchema.Payload` load cleanly.
