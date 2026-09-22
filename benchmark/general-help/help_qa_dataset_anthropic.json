@@ -1,0 +1,1760 @@
+[
+  {
+    "question": "A researcher reusing data from the CCKP is confused about how Synapse relates to the portal. Based on the documentation, what role does Synapse play?",
+    "mc1_targets": {
+      "choices": [
+        "Synapse is the public-facing search interface that has replaced the CCKP",
+        "Synapse serves as the CCKP's backend data warehouse, letting users upload, store, analyze, and privately track data before it is released publicly on the CCKP",
+        "Synapse is an NCI Division of Cancer Biology-funded consortium coordinated by the MC2 Center",
+        "Synapse is the government agency that sponsors and funds the CCKP"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/about-the-cckp-new"
+    ],
+    "context": "Sage Bionetworks developed the Synapse data sharing platform as part of our work in advocating open science. Synapse unlocks collaborative data curation, analysis, and computational modeling. It allows users to upload, store, analyze, and privately track data before releasing to the public-facing CCKP. Think of Synapse as the CCKP's backend data warehouse.",
+    "id": "f58a1d89-9af6-4166-8b83-5d36f515fb1c"
+  },
+  {
+    "question": "A prospective contributor reads that the MC2 Center is organized into operational hubs. Which of the following is NOT one of the three hubs described in the documentation?",
+    "mc1_targets": {
+      "choices": [
+        "Collaboration Hub",
+        "Resource Coordination Hub",
+        "Outreach Hub",
+        "Data Engineering Hub"
+      ],
+      "labels": [
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/about-the-mc2-center"
+    ],
+    "context": "Led by Sage Bionetworks, a non-profit organization based in Seattle, Washington, the MC2 Center is made up of three operational hubs: the Collaboration Hub, the Resource Coordination Hub, and the Outreach Hub.",
+    "id": "92876684-328b-40b4-9662-ae47222eb407"
+  },
+  {
+    "question": "A program officer wants to confirm the exact NIH/NCI grant mechanism funding the MC2 Center. According to the documentation, which award number is cited?",
+    "mc1_targets": {
+      "choices": [
+        "U24 CA274494",
+        "U01 CA209414",
+        "R01 CA123456",
+        "P30 CA015704",
+        "Not covered in documentation"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "FUNDER",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/about-the-mc2-center"
+    ],
+    "context": "The MC2 Center is funded by the NIH/NCI Division of Cancer Biology (U24 CA274494).",
+    "id": "659be49c-d984-4420-b93c-4ac6de26a6a1"
+  },
+  {
+    "question": "A data contributor has a question that isn't answered in the FAQs and wants to know who actually maintains the CCKP and how to reach them directly. Based on the documentation, which statement is correct?",
+    "mc1_targets": {
+      "choices": [
+        "Sage Bionetworks, as the organization leading the MC2 Center, maintains the CCKP; support requests can be emailed to mc2center@sagebase.org or submitted via the MC2 Center Help Desk",
+        "The National Cancer Institute directly maintains and staffs support for the CCKP through cancer.gov",
+        "The Cancer Systems Biology Consortium (CSBC) independently maintains the CCKP, and support requests must go through Synapse's general support line only",
+        "Harvard University, as the lead operational hub, maintains the CCKP and handles all support requests"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/about-the-cckp-new",
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/contact-us-new"
+    ],
+    "context": "About the CCKP: 'Sage Bionetworks leads the NCI-funded Multi-Consortia Coordinating (MC2) Center... As the MC2 Center, Sage supports engagement and resource sharing within the cancer research community by maintaining the CCKP.' Contact Us: 'The Cancer Complexity Knowledge Portal (CCKP) is maintained by the MC2 Center... please contact the MC2 Center by email at mc2center@sagebase.org or submit a support request through the MC2 Center Help Desk.'",
+    "id": "0104c39c-200b-4876-9e4d-91936738cee7"
+  },
+  {
+    "question": "A researcher outside the funded consortia wonders whether they need a paid account or institutional affiliation to access datasets, tools, and publications on the CCKP. What does the documentation say?",
+    "mc1_targets": {
+      "choices": [
+        "The CCKP is open and free to all, consistent with open science principles",
+        "Access is free only for researchers affiliated with NCI-funded consortia programs",
+        "A subscription fee is required to download datasets, though browsing is free",
+        "Access requires approval from the MC2 Center Help Desk on a case-by-case basis"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/consume-the-cckp-new"
+    ],
+    "context": "Thanks to open science principles, the Cancer Complexity Knowledge Portal (CCKP) is open and free to all.",
+    "id": "df0ccbc5-8db6-4e0a-8c68-573c2dd33977"
+  },
+  {
+    "question": "A new contributor is browsing the CCKP docs navigation and wants to find the 'Download CCKP Information' guide. Under which top-level topic is it listed?",
+    "mc1_targets": {
+      "choices": [
+        "Consume the CCKP",
+        "Contribute to the CCKP",
+        "About the CCKP",
+        "Contact Us"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs",
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/consume-the-cckp-new"
+    ],
+    "context": "Docs homepage, under 'Consume the CCKP': '+ Explore CCKP Resources / + Use Search, Filters, and Charts / + Download CCKP Information / + Navigate Resource Details'. Consume the CCKP page: 'Use the guides below to orient yourself and discover the full range of datasets, tools, and publications available through the portal: ... Download CCKP Information ...'",
+    "id": "480351e4-1c79-44b6-9f6e-fd41bc8e340a"
+  },
+  {
+    "question": "According to the CCKP's 'Files and Metadata: Annotation and Organization' guide, what is the correct ID pattern for a Biospecimen record?",
+    "mc1_targets": {
+      "choices": [
+        "[Grant number]-B[Number]",
+        "[Parent ID]-B[Number]",
+        "[Grant number]-BIO[Number]",
+        "[Study ID]-BIOSPEC[Number]",
+        "[Model/Individual ID]-SPEC[Number]"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/files-and-resources-annotation-and-organization"
+    ],
+    "context": "IDs follow these patterns: Study: [Grant number]-[Journal/Type]-[Date], Model: [Grant number]-M[Number], Individual: [Grant number]-IND[Number], Biospecimen: [Parent ID]-B[Number]",
+    "id": "d86077a6-1d17-4a62-8c3f-b930ae37ff74"
+  },
+  {
+    "question": "A researcher is browsing the CCKP Explore module and wants to export page-level search results as a CSV/TSV file for offline review, as described in 'Download CCKP Information'. For which resource type is this Page-Level Information export NOT available?",
+    "mc1_targets": {
+      "choices": [
+        "Publications",
+        "Grants",
+        "Datasets",
+        "Tools",
+        "People"
+      ],
+      "labels": [
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/download-cckp-information"
+    ],
+    "context": "Unlike other Explore modules, Datasets does not offer the option to download Page-Level Information. As discussed, they link to external sources.",
+    "id": "df85ccf9-0fb3-4de2-ac46-d1d5b8539eba"
+  },
+  {
+    "question": "In the CCKP's 'Files and Metadata: Ingress' guide, which Data Use Ontology (DUO) code should a contributor log in the Data Sharing Plan to indicate that there are no restrictions on how their data can be used?",
+    "mc1_targets": {
+      "choices": [
+        "GRU (DUO:0000042 - General research use)",
+        "NRES (DUO:0000004 - No restrictions)",
+        "HMB (DUO:0000006 - Health or medical or biomedical research only)",
+        "NPU (DUO:0000045 - Not-for-profit use only)",
+        "DS (DUO:0000007 - Disease specific research)"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/files-and-resources-ingress"
+    ],
+    "context": "Log Data Use Ontology (DUO) codes in your Data Sharing Plan: Use column V \"DSP Data Use Codes\". DUO codes are standardized terms that clearly specify how data can be used. Examples of DUO codes include: NRES (DUO:0000004 - No restrictions), GRU (DUO:0000042 - General research use), NPU (DUO:0000045 - Not-for-profit use only), HMB (DUO:0000006 - Health or medical or biomedical research only), DS (DUO:0000007 - Disease specific research), GS (DUO:0000022 - Geographical restriction)",
+    "id": "27ec2e9f-5961-4cf5-83b1-ec0c6b7a5ab7"
+  },
+  {
+    "question": "A contributor is gathering everything they'll need before starting the data submission process and checks both the 'Files and Metadata: Ingress' and 'Files and Metadata: Annotation and Organization' guides. Which requirement appears in Ingress's 'Before You Begin' checklist for contributors but is NOT listed among the contributor 'Required Access' items in the Annotation and Organization guide?",
+    "mc1_targets": {
+      "choices": [
+        "Access to your grant-specific Synapse project",
+        "Access to metadata templates",
+        "Python with synapseclient installed",
+        "Administrative access to Synapse",
+        "Access to schematic CLI tools"
+      ],
+      "labels": [
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/files-and-resources-ingress",
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/files-and-resources-annotation-and-organization"
+    ],
+    "context": "Ingress page: 'Before You Begin \u2014 You'll need: A Synapse account with certification, Access to your grant-specific project, Python with synapseclient installed (for file uploads)'. Annotation and Organization page: 'Required Access \u2014 For Contributors: Access to your grant-specific Synapse project, Access to metadata templates (provided by MC2 Center). For MC2 Center Staff: Administrative access to Synapse, Access to schematic CLI tools, Access to validation scripts'",
+    "id": "ec318eca-6dd6-4173-8763-1e666af90720"
+  },
+  {
+    "question": "Per the CCKP's 'Explore CCKP Resources' guide, how does the News section specifically describe a benefit for Principal Investigators?",
+    "mc1_targets": {
+      "choices": [
+        "It lets them download raw sequencing files directly from the News page",
+        "It gives them strategic insights into emerging research trends, tools, and collaboration opportunities that inform funding decisions",
+        "It allows them to submit new grant applications directly through the News page",
+        "It grants them access to IRB documentation for human subjects research",
+        "It lets them validate contributor metadata templates before submission"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "FUNDER",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/explore-cckp-resources-new"
+    ],
+    "context": "Principal Investigators can gain strategic insights into emerging research trends, tools, and collaboration opportunities that inform funding decisions, enhance lab capabilities, and position their research programs competitively within the cancer research landscape.",
+    "id": "0e72229e-ff02-4f36-91d5-a626dd681c70"
+  },
+  {
+    "question": "The 'Contribute to the CCKP' page notes that specific resource storage, curation, and dissemination support is available for several NIH/NCI Division of Cancer Biology (DCB) consortia programs. According to the 'Explore CCKP Resources' guide's Consortia section, which of the following is one of those NCI-funded research networks whose resources are accessible through the CCKP?",
+    "mc1_targets": {
+      "choices": [
+        "Cancer Systems Biology Consortium (CSBC)",
+        "American Association for Cancer Research (AACR)",
+        "The Cancer Genome Atlas Program (TCGA)",
+        "National Human Genome Research Institute (NHGRI)",
+        "National Cancer Institute Center for Cancer Research (CCR)"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "X",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/contribute-to-the-cckp",
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/explore-cckp-resources-new"
+    ],
+    "context": "Contribute to the CCKP page: 'specific resource storage, curation, and dissemination support are available for several NIH/NCI Division of Cancer Biology (DCB) consortia programs.' Explore CCKP Resources page: 'Access specialized resources and expertise from our NCI-funded research networks... Cancer Systems Biology Consortium (CSBC): Get computational models and multi-dimensional analysis tools that integrate experimental biology data...'",
+    "id": "10e04ec9-10a4-4acd-963d-fcdbed737e2e"
+  },
+  {
+    "question": "Under the CCKP's data access framework described in the Files and Metadata: Packaging and Release guide, what specifically distinguishes 'Conditional Access' from 'Controlled Access'?",
+    "mc1_targets": {
+      "choices": [
+        "Conditional Access requires the user to accept conditions of use to gain access to files, while Controlled Access requires the user to submit an access request or provide documentation.",
+        "Conditional Access is available only to registered Synapse users, while Controlled Access is open to anyone on the internet.",
+        "Conditional Access requires payment for data access, while Controlled Access is free.",
+        "Conditional Access applies only to human genomics data, while Controlled Access applies to all other data types."
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/files-and-resources-packaging-and-release"
+    ],
+    "context": "Access Requirements: User must accept conditions of use to gain access to files (Conditional Access); User must submit an access request or provide documentation to gain access to files (Controlled Access).",
+    "id": "ae5e5e8f-5ad9-49ad-916a-de6dd33c12a7"
+  },
+  {
+    "question": "During the 'Adjust Dataset schemas' step of the Packaging and Release process, which field must be removed from the Dataset schema itself, even though it is also listed among the automatically applied annotations that should be retained?",
+    "mc1_targets": {
+      "choices": [
+        "Id",
+        "Name",
+        "Path",
+        "dataFileSizeBytes",
+        "currentVersion"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/files-and-resources-packaging-and-release"
+    ],
+    "context": "Remove from Dataset schema: StudyKey, Id, FileViewId, EntityId, Component, Any other Component_Id attributes applied... From automatically applied annotations, only retain the following: Id, Name, Path, currentVersion, dataFileSizeBytes, dataFileMD5Hex.",
+    "id": "70a005cf-9367-4de0-a63f-2f7186dc6e36"
+  },
+  {
+    "question": "A researcher who is NOT part of an NIH/NCI DCB-funded consortium wants hands-on data storage, curation, and dissemination help from the MC2 Center. Based on the CCKP FAQ and Getting Started pages, what should they expect?",
+    "mc1_targets": {
+      "choices": [
+        "The CCKP itself remains free and open to browse, but direct MC2 Center storage/curation/dissemination support is reserved for individuals funded by consortia programs like CCBIR, CSBC, MetNet, PS-ON, and Cancer TEC.",
+        "They will receive the same full curation support as funded consortium members, since the CCKP is accessible to everyone.",
+        "They must pay a subscription fee to receive MC2 Center curation support.",
+        "The MC2 Center will only assist them if their data has already been published in a journal."
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/faq",
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/getting-started-new"
+    ],
+    "context": "FAQ: 'While the CCKP is accessible to everyone, the specific resource storage, curation, and dissemination support provided by the MC2 Center are only available to individuals funded by these consortia programs.' Getting Started: 'While the CCKP is accessible to everyone, specific resource storage, curation, and dissemination support are available for several NIH/NCI Division of Cancer Biology (DCB) consortia programs.'",
+    "id": "e012b4eb-b1bd-4236-80bb-9dd41d4e86aa"
+  },
+  {
+    "question": "According to the CCKP FAQs, how long will data uploaded to Synapse by MC2 Center-supported consortia members be stored before it may be migrated to a cold storage solution?",
+    "mc1_targets": {
+      "choices": [
+        "10 years after completion of the MC2 Center project in 2027",
+        "10 years from the date each file is individually uploaded",
+        "5 years after the associated publication is released",
+        "Indefinitely, with no migration to cold storage ever planned"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/faq"
+    ],
+    "context": "Any data uploaded to Synapse by consortia members supported by the MC2 Center will be stored for 10 years after completion of MC2 Center project in 2027. After this time, data may be migrated to a cold storage solution to minimize storage costs, however, data will be retrievable upon request.",
+    "id": "26e632ce-bf34-466e-ab5e-cefbf4e64942"
+  },
+  {
+    "question": "Combining the High-Level Steps & Expectations guide with the Files and Metadata: Packaging and Release guide, which pair of turnaround times is accurate for CCKP data contribution?",
+    "mc1_targets": {
+      "choices": [
+        "The MC2 Center reviews a submitted Data Sharing Plan (DSP) within one week; Metadata Organization during packaging takes 2-3 business days.",
+        "The MC2 Center reviews a submitted DSP within one month; Metadata Organization during packaging takes 2-3 business days.",
+        "The MC2 Center reviews a submitted DSP within one week; Metadata Organization during packaging takes 5-7 business days.",
+        "The MC2 Center reviews a submitted DSP within 3 business days; Metadata Organization during packaging takes one week."
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/high-level-steps-expectations",
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/files-and-resources-packaging-and-release"
+    ],
+    "context": "High-Level Steps & Expectations: 'After DSP submission, the MC2 Center will review your plan within one week, and may request clarification or additional details.' Packaging and Release, Timeline Expectations: 'Metadata Organization: 2-3 business days - Metadata extraction and entity annotation, Relationship verification, Schema configuration.'",
+    "id": "9e6551dd-248a-4382-822b-867df6c032f0"
+  },
+  {
+    "question": "According to the CCKP's Getting Started page, which of the following best describes who can access and navigate CCKP data?",
+    "mc1_targets": {
+      "choices": [
+        "Navigating CCKP data is open and free for all, including researchers, trainees, students, patient advocates, and funders, thanks to open science principles.",
+        "Only individuals funded by NIH/NCI DCB consortia programs may view CCKP data.",
+        "Access requires an approved institutional data use agreement for all resource types.",
+        "Only registered Synapse users can browse the CCKP."
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "PATIENT",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/getting-started-new"
+    ],
+    "context": "The resources contained within the CCKP serve a broad community, including researchers, trainees, students, patient advocates, and funders. Navigating CCKP data is open and free for all, thanks to open science principles.",
+    "id": "8f527109-7da8-42fc-aa47-e5ece268f7f9"
+  },
+  {
+    "question": "As part of becoming a Certified Synapse User (a prerequisite for uploading data to Synapse for the CCKP), how many questions are on the certification quiz and about how long does it typically take to complete?",
+    "mc1_targets": {
+      "choices": [
+        "15 questions, about 15-20 minutes",
+        "10 questions, about 10 minutes",
+        "25 questions, about 30-40 minutes",
+        "20 questions, about 1 hour",
+        "5 questions, about 5 minutes"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/initiating-the-data-contribution-sharing-process"
+    ],
+    "context": "Certification Process: To become certified, you need to take a short quiz covering the Synapse Commons Data Use Procedure. This quiz ensures your understanding of the rules and policies governing data sharing on Synapse. It consists of 15 questions and typically takes around 15-20 minutes to complete.",
+    "id": "d30a2ee7-8d16-4df2-a31c-f81d7e7b6c00"
+  },
+  {
+    "question": "A contributor needs to identify their NIH/NCI DCB grant number before contacting the MC2 Center Help Desk. According to the CCKP contribution guide, what format should this grant number follow, and where can they look it up if they don't already have it on hand?",
+    "mc1_targets": {
+      "choices": [
+        "Format \"CA######\"; look it up by searching the Principal Investigator's name on the CCKP Grants page",
+        "Format \"NCI-#####\"; look it up on NIH RePORTER by consortium name",
+        "Format \"R01-######\"; look it up on the CCKP Publications page",
+        "Format \"DCB-####-##\"; request it directly from Synapse support"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/initiating-the-data-contribution-sharing-process"
+    ],
+    "context": "Identify your grant number. You can identify your NIH/NCI DCB grant number by searching the name of the Principal Investigator within the Grants page of the CCKP. The grant number should follow the format \u201cCA######\u201d.",
+    "id": "cababbdf-214d-4a16-b89a-cc9aaa02940d"
+  },
+  {
+    "question": "While preparing metadata using the Google Sheet template linked in their grant-specific Synapse project, a contributor notices a CSV file is also stored in the same folder. According to the 'Metadata Only: Ingress, Annotation & Validation' guide, what should they do?",
+    "mc1_targets": {
+      "choices": [
+        "Leave the CSV alone and only record metadata in the linked Google Sheet template",
+        "Edit the CSV directly since it is the canonical copy of the template",
+        "Enter data in both the CSV and the Google Sheet to keep them synchronized",
+        "Delete the CSV so it doesn't cause confusion before starting"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/external-metadata-ingress-contributor-process"
+    ],
+    "context": "Select the Google Sheet linked in the folder. If present, do not modify the CSV stored in this folder. Use the \u201cOpen Link\u201d button to access the template... ONLY record metadata in templates linked in your Synapse Project",
+    "id": "c3a432da-51ea-47a8-b18d-fa52887e3d8a"
+  },
+  {
+    "question": "While browsing publications on the CCKP, a reuser notices the 'Assay' field for one publication is listed as 'Not Applicable.' What does this most likely indicate about the publication?",
+    "mc1_targets": {
+      "choices": [
+        "The study is likely a review, computational analysis, or theoretical model rather than one involving an experimental assay",
+        "The publication's metadata has not yet been validated by the MC2 Center",
+        "The publication does not have a DOI on record",
+        "The publication was not funded by an NIH/NCI DCB grant"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/resource-details-new"
+    ],
+    "context": "Assay \u2013 The experimental or analytical method used to conduct the research. \"Not Applicable\" suggests that the study might be a review, computational analysis, or theoretical model rather than an experimental assay.",
+    "id": "789b845d-9e2c-4ea1-821c-7facb94ecc2d"
+  },
+  {
+    "question": "A funder reviewing a grant's detail page on the CCKP wants to find the underlying NIH funding record. Which grant metadata field provides this link, and how is 'Grant Type' classified according to the resource details guide?",
+    "mc1_targets": {
+      "choices": [
+        "The \"NIH Reporter Link\" provides a URL to the NIH RePORTER database; \"Grant Type\" classifies the grant as an NIH cooperative agreement",
+        "The \"Consortium\" field provides a URL to NIH RePORTER; \"Grant Type\" classifies the grant by funding amount",
+        "The \"Theme\" field links to NIH RePORTER; \"Grant Type\" classifies the grant as a training grant",
+        "The \"Investigator\" field links to NIH RePORTER; \"Grant Type\" classifies the grant by consortium size"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "FUNDER",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/resource-details-new"
+    ],
+    "context": "NIH Reporter Link \u2013 A direct URL to the NIH RePORTER database, where grant details and funding information are stored... Grant Type \u2013 The classification of the grant, which is an NIH cooperative agreement.",
+    "id": "c9db72a6-b175-4c3e-87d9-5bd06aed915c"
+  },
+  {
+    "question": "A reuser is examining a 10x Visium spatial transcriptomics dataset on the CCKP. The Dataset resource details page defines 'Assay' as the experimental method or technique used to generate a dataset. Looking at the MC2 Center Data Models Explorer's 10x Visium RNA Level 1 model, which pair of valid values is defined for both the 'Visium Spatial Read1' and 'Visium Spatial Read2' attributes?",
+    "mc1_targets": {
+      "choices": [
+        "cDNA and Spatial Barcode and UMI",
+        "Read 1 and Read 2",
+        "Forward Strand and Reverse Strand",
+        "Barcode and Index",
+        "R1 FASTQ and R2 FASTQ"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://help.cancercomplexity.synapse.org/cancer-complexity-knowledge-portal-docs/resource-details-new",
+      "https://mc2-center.github.io/data-models/valid_values/visiumRNALevel1/"
+    ],
+    "context": "Assay \u2013 Identifies the experimental method or technique used to generate the dataset. [Dataset Metadata Definitions] // Attribute: Visium Spatial Read1: Valid Values are cDNA and Spatial Barcode and UMI. Attribute: Visium Spatial Read2: Valid Values are cDNA and Spatial Barcode and UMI.",
+    "id": "3901b2bc-c931-4c78-a485-410338edd8af"
+  },
+  {
+    "question": "According to the Biospecimen full field reference in the MC2 Center Data Models Explorer, which of the following attributes is marked as Required (True)?",
+    "mc1_targets": {
+      "choices": [
+        "Biospecimen Stain",
+        "Biospecimen Preservation Method",
+        "Biospecimen Type",
+        "Biospecimen Age at Collection"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/biospecimen/"
+    ],
+    "context": "| Biospecimen Stain | Any of the various methods that use a dye, reagent, or other material for producing coloration in tissues or microorganisms for microscopic examination. | True | string | ... | | Biospecimen Preservation Method | Text term that represents the method used to preserve the sample. | False | ... | Biospecimen Type | The type of biospecimen | False | ... | Biospecimen Age at Collection | Age at the time the biospecimen was collected. | False |",
+    "id": "17d96c4c-7fb6-4fa4-88d4-8e369a5c936f"
+  },
+  {
+    "question": "A contributor is filling out a Biospecimen record but only knows the broad category of the sample, not its precise subtype. Based on the field reference table, which statement correctly describes 'Biospecimen Type Category' versus 'Biospecimen Type'?",
+    "mc1_targets": {
+      "choices": [
+        "Biospecimen Type Category is required and describes the general category of the biospecimen, while Biospecimen Type is optional and describes the specific type",
+        "Biospecimen Type is required and Biospecimen Type Category is optional",
+        "Both fields are required and must match exactly",
+        "Biospecimen Type Category actually refers to the donor species, not the sample category",
+        "Both fields are free-text with no controlled vocabulary of valid values"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/biospecimen/"
+    ],
+    "context": "| Biospecimen Type Category | The general category of this biospecimen. | True | string | ... | [View](../../valid_values/biospecimen/#attribute-biospecimen-type-category) | | Biospecimen Type | The type of biospecimen | False | string | ... | [View](../../valid_values/biospecimen/#attribute-biospecimen-type)",
+    "id": "6bc12e0e-4e42-4bdb-b8c2-2805f51e53ae"
+  },
+  {
+    "question": "A data reuser is trying to understand how access to a dataset was granted, by checking the 'dataPermission' controlled vocabulary term recorded for it. Which of the following is actually a valid 'dataPermission' term in the MC2 Center data model's All Terms list?",
+    "mc1_targets": {
+      "choices": [
+        "Agreement",
+        "License",
+        "Consent",
+        "Embargo",
+        "Approval"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/valid_values/all_terms/"
+    ],
+    "context": "| dataPermission | Agreement | | dataPermission | Attestation | | dataPermission | Award | | dataPermission | Other |",
+    "id": "fe1aee36-f645-440d-81f3-3b1d5dd71dca"
+  },
+  {
+    "question": "A reuser browsing the 10x Visium RNA data model wants to know at which processing level each of two attributes is documented: the boolean 'Visium Applied Hard Trimming' attribute, and the 'Visium File Type' attribute (whose valid values include tissue_positions, barcodes, features, and high res image). Which is correct?",
+    "mc1_targets": {
+      "choices": [
+        "Visium Applied Hard Trimming is documented at Level 2, and Visium File Type is documented at Level 3",
+        "Visium Applied Hard Trimming is documented at Level 3, and Visium File Type is documented at Level 2",
+        "Both attributes are documented at Level 2",
+        "Both attributes are documented at Level 4",
+        "Both attributes are documented at Level 1"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/valid_values/visiumRNALevel2/",
+      "https://mc2-center.github.io/data-models/valid_values/visiumRNALevel3/"
+    ],
+    "context": "From visiumRNALevel2: '10x Visium RNA Level 2 ... Attribute: `Visium Applied Hard Trimming` | Valid Value | Description | | --- | --- | | True | nan | | False | nan |'. From visiumRNALevel3: '10x Visium RNA Level 3 ... Attribute: `Visium File Type` | Valid Value | Description | | --- | --- | | reference png | nan | ... | tissue_positions | nan | | barcodes | nan | | features | nan | ... | high res image | nan |'",
+    "id": "faaebb60-690b-43c6-b1b5-65ce57a6238a"
+  },
+  {
+    "question": "Per the 'Releasing a new version' section of the Contributing to the Data Model guide, if a release includes one PR labeled 'major' and another PR labeled 'patch', which version number (x, y, or z in x.y.z) actually increments?",
+    "mc1_targets": {
+      "choices": [
+        "Only x, the major version number",
+        "Only z, the patch version number, since it was the most recent label applied",
+        "Both x and z increment together",
+        "All three of x, y, and z increment",
+        "None increment automatically; a maintainer must manually choose"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/contributing/"
+    ],
+    "context": "any PR labeled with `major` will increment `x` ... any PR labeled with `patch` will increment `z` ... Note: Only *one* number will increment, where `x` will take precedence, followed by `y`, then finally `z`.",
+    "id": "f92851d7-532e-4aa6-a1bd-8b1cc2c36816"
+  },
+  {
+    "question": "A patient advocate is reviewing biospecimen metadata and sees a 'Biospecimen Tumor Grade' value. Based on the Biospecimen field reference and the associated controlled vocabulary, which of the following is NOT a valid value for this attribute (i.e., it belongs to staging, not grading)?",
+    "mc1_targets": {
+      "choices": [
+        "Stage IV",
+        "G1",
+        "High Grade",
+        "Not Reported",
+        "Unknown"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "PATIENT",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/biospecimen/",
+      "https://mc2-center.github.io/data-models/valid_values/all_terms/"
+    ],
+    "context": "From the Biospecimen model page: 'Biospecimen Tumor Grade | Numeric value to express the degree of abnormality of cancer cells, a measure of differentiation and aggressiveness.' From the All terms page: | tumorGrade | G1 | | tumorGrade | G2 | | tumorGrade | G3 | | tumorGrade | G4 | | tumorGrade | GX | | tumorGrade | GB | | tumorGrade | High Grade | | tumorGrade | Intermediate Grade | | tumorGrade | Low Grade | | tumorGrade | Unknown | | tumorGrade | Not Reported | | tumorGrade | Not Applicable | -- 'Stage IV' does not appear among the tumorGrade terms.",
+    "id": "3eb39d81-1d31-4951-adc0-baf542eda6ca"
+  },
+  {
+    "question": "In the Dataset model's full field reference, which of the following attributes is marked as Required (True)?",
+    "mc1_targets": {
+      "choices": [
+        "Dataset Description",
+        "Dataset Tissue",
+        "Dataset Species",
+        "Dataset Tumor Type",
+        "Dataset File Formats"
+      ],
+      "labels": [
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/dataset/"
+    ],
+    "context": "Dataset Species | The species the data was collected on. Multiple values permitted, comma separated. | True | string_list ... Dataset Description | Description of the dataset. | False ... Dataset Tumor Type | ... | False ... Dataset Tissue | ... | False ... Dataset File Formats | ... | False",
+    "id": "67d1f497-1787-47a6-a91e-95d9f1aa88a2"
+  },
+  {
+    "question": "A contributor is filling out a Dataset Sharing Plan (DataDSP) entry and is unsure whether both date fields must be completed. According to the DataDSP full field reference, which statement is correct?",
+    "mc1_targets": {
+      "choices": [
+        "Both DSP Planned Upload Date and DSP Planned Release Date are required.",
+        "DSP Planned Upload Date is required, but DSP Planned Release Date is optional.",
+        "DSP Planned Release Date is required, but DSP Planned Upload Date is optional.",
+        "Neither DSP Planned Upload Date nor DSP Planned Release Date is required."
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/DataDSP/"
+    ],
+    "context": "DSP Planned Upload Date | A non-binding, estimated date by which the files are expected to be uploaded to a repository. | True | string | date ... DSP Planned Release Date | The projected date that marks the end of any requested or required sharing embargo for the dataset. | False | string | date",
+    "id": "84fde165-990d-438b-b610-abaf0816936b"
+  },
+  {
+    "question": "A contributor is entering both a Dataset record and a File record for the same project and wants to know if the two ID fields follow the same formatting rule. Based on the full field reference tables, which statement is correct?",
+    "mc1_targets": {
+      "choices": [
+        "FileView_id must match the Synapse ID pattern ^syn\\d{7,8}$, while DatasetView_id has no required regex pattern.",
+        "DatasetView_id must match the Synapse ID pattern ^syn\\d{7,8}$, while FileView_id has no required pattern.",
+        "Both DatasetView_id and FileView_id must match the ^syn\\d{7,8}$ pattern.",
+        "Neither DatasetView_id nor FileView_id has any required format.",
+        "FileView_id is optional, while DatasetView_id is required."
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/dataset/",
+      "https://mc2-center.github.io/data-models/model/file/"
+    ],
+    "context": "Dataset page: 'DatasetView_id | Unique ID associated with this Dataset View entry... | True | string | None | None' (no Regex Pattern listed). File page: 'FileView_id | Unique ID associated with a File entry... | True | string | None | ^syn\\d{7,8}$ | None'",
+    "id": "ba03208f-be5a-4494-a5a0-13fd516f5f8c"
+  },
+  {
+    "question": "According to the Education Resource full field reference, which attribute is NOT required?",
+    "mc1_targets": {
+      "choices": [
+        "Resource Title",
+        "Resource Description",
+        "Resource License",
+        "Resource Contributors",
+        "Resource Primary Audience"
+      ],
+      "labels": [
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/education/"
+    ],
+    "context": "Resource License | The name of the license applied to the item by the contributor(s), if applicable. Multiple values should be provided as a comma separated list. | False | string_list ... Resource Title | Title of the item. | True ... Resource Description | Abstract or summary of the item. | True ... Resource Contributors | ... | True ... Resource Primary Audience | ... | True",
+    "id": "8d21fafc-e9e3-432a-a62d-bf98069dfe88"
+  },
+  {
+    "question": "A researcher wants to reprocess NanoString GeoMx DSP expression data (Levels 1-3) that another lab shared on the portal, and needs to find the exact probe configuration and run settings that produced it. Which model entry documents that supporting information?",
+    "mc1_targets": {
+      "choices": [
+        "The GeoMx Imaging and Level 1-3 data files themselves, since all run settings are embedded in the count data",
+        "A Dataset Sharing Plan (DataDSP) entry for the grant",
+        "A GeoMx Auxiliary Files entry, which links the ROI/segment annotation file, PKC probe kit file, lab worksheet, and DSP config.ini file",
+        "An Education Resource entry describing the GeoMx protocol"
+      ],
+      "labels": [
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/geomxAux/"
+    ],
+    "context": "A NanoString GeoMx Auxiliary Files entry documents the supporting, non-image and non-count files that accompany a NanoString GeoMx Digital Spatial Profiler (DSP) experiment... Capturing their Synapse identifiers here ensures that anyone reusing the imaging or expression data (Levels 1-3) can also locate the exact probe configuration, worksheet, and run settings that produced it.",
+    "id": "8bcf9728-4b86-4973-8a20-d7d3caa92860"
+  },
+  {
+    "question": "One PI has already deposited RNA-seq data in GEO and wants it listed on the CCKP. A second PI is still planning a future data upload and needs to record an estimated upload timeline and expected storage size for a grant report. Which model should the second PI use to document their plan?",
+    "mc1_targets": {
+      "choices": [
+        "A Dataset entry, because it documents finished datasets with a known Dataset Url and DOI",
+        "A Dataset Sharing Plan (DataDSP) entry, because it documents planned uploads, including a non-binding estimated Planned Upload Date and expected storage size",
+        "An Education Resource entry, because it documents materials designed to support learning",
+        "A File entry, because it documents a single data unit like a document or image"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "FUNDER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/dataset/",
+      "https://mc2-center.github.io/data-models/model/DataDSP/"
+    ],
+    "context": "Dataset page: 'A Dataset refers to a structured collection of data that is organized for analysis, sharing, and research... Dataset Url | The url of where the dataset is stored. | True'. DataDSP page: 'A Dataset Sharing Plan (DataDSP) is a structured framework used to document the sharing, storage, and usage details of datasets within MC2 Center-supported Synapse projects... DSP Planned Upload Date | A non-binding, estimated date by which the files are expected to be uploaded to a repository. | True ... DSP Storage Size | The expected total storage space required for the dataset in gigabytes (GB) | False'",
+    "id": "dff1be50-8c71-4b0a-a827-bccc18ec8f17"
+  },
+  {
+    "question": "In the GeoMx Level 1 field reference, several NGS library attributes are marked Required = True (Library Strategy, Library Source Material, Library Source Molecule, Library Layout). Which of the following NGS library attributes is actually NOT required (Required = False)?",
+    "mc1_targets": {
+      "choices": [
+        "NGS Library Strategy",
+        "NGS Library Source Material",
+        "NGS Library Source Molecule",
+        "NGS Library Selection Method",
+        "NGS Library Layout"
+      ],
+      "labels": [
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/geomxLevel1/"
+    ],
+    "context": "NGS Library Selection Method | How nucleic acid molecules are isolated. | False | string ... (compare to NGS Library Strategy | True, NGS Library Source Material | True, NGS Library Source Molecule | True, NGS Library Layout | Text description of the library layout, one of Paired-end or Single. | True)",
+    "id": "6cf01f48-609e-4044-8d63-8dfbd54a8945"
+  },
+  {
+    "question": "A reuser downloading a NanoString GeoMx dataset sees files described as 'Level 3' and wants to know what that means before using them in a downstream analysis. Based on the GeoMx Level 3 field reference page, what does a Level 3 entry represent?",
+    "mc1_targets": {
+      "choices": [
+        "Fully processed count data produced by the GeoMx DSP pipeline, such as final probe- or target-level expression matrices",
+        "Raw sequencing files produced from a GeoMx DSP experiment, prior to alignment or count conversion",
+        "Processed count conversion files (DCC/RCC) derived from a GeoMx Level 1 raw sequencing file",
+        "ROI and AOI metadata generated during a GeoMx DSP run",
+        "Raw scan images acquired directly by the GeoMx DSP instrument"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/geomxLevel3/"
+    ],
+    "context": "A NanoString GeoMx Level 3 entry documents the fully processed count data produced by the NanoString GeoMx DSP pipeline, such as final probe- or target-level expression matrices. This level captures the unique probe and unique target counts represented in the file, the matrix type (e.g. raw, normalized, or background-subtracted counts), and the software, workflow, and parameters used to generate the processed output.",
+    "id": "1838f370-1635-4f70-88e8-bae5f2fef54e"
+  },
+  {
+    "question": "A contributor filling out the NanoStringGeoMXROISegmentAnnotation template is unsure which fields they can safely leave blank. Which of the following attributes is actually required (Required = True) and cannot be left blank?",
+    "mc1_targets": {
+      "choices": [
+        "GeoMx ROI X Coordinate",
+        "GeoMx AOI Name",
+        "GeoMx Binding Density",
+        "GeoMx QC status",
+        "GeoMx Surface area"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/geomxRoi/"
+    ],
+    "context": "GeoMx AOI Name | Name of Area of Illumination corresponding to file. Multiple names should be comma-separated | True. By contrast, GeoMx ROI X Coordinate, GeoMx Binding Density, GeoMx QC status, and GeoMx Surface area are all listed as Required = False.",
+    "id": "53afc628-bacb-4882-aba7-c0832d06d97f"
+  },
+  {
+    "question": "Both GeoMx Level 1 and GeoMx Level 2 entries capture NGS library and sequencing platform metadata (library strategy, layout, raw reads, read length, etc.). Which read-processing metric is introduced at Level 2 and is NOT part of the Level 1 field reference?",
+    "mc1_targets": {
+      "choices": [
+        "NGS Raw Reads",
+        "NGS Read Length",
+        "NGS Aligned Reads",
+        "NGS Library Layout",
+        "NGS Library Strategy"
+      ],
+      "labels": [
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/geomxLevel1/",
+      "https://mc2-center.github.io/data-models/model/geomxLevel2/"
+    ],
+    "context": "GeoMx Level 1 page: 'detailed next-generation sequencing (NGS) library metadata: library strategy, source material and molecule, selection method, layout, sequencing platform, read length, raw read counts, unique bases, sequencing coverage...'. GeoMx Level 2 page: 'This level captures the same core library preparation and sequencing platform metadata as Level 1, along with the read-processing metrics generated during count conversion: stitched reads, aligned reads, deduplicated reads, trimmed reads, percent reads mapping at Q30 (MapQ30)...'. The Level 2 field table includes 'NGS Aligned Reads' which does not appear in the Level 1 field table.",
+    "id": "2230e941-20cf-419c-b5b5-0a0581c5613b"
+  },
+  {
+    "question": "In the GeoMx Imaging field reference, which attribute is marked Required = True, meaning it must be provided for every imaging entry?",
+    "mc1_targets": {
+      "choices": [
+        "GeoMx Imaging Channel Names",
+        "Image Platform Model",
+        "Image Assay Type",
+        "GeoMx Imaging AOI Coordinates",
+        "Image Software"
+      ],
+      "labels": [
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/geomxImaging/"
+    ],
+    "context": "Image Assay Type | Type of imaging assay | True. In contrast, GeoMx Imaging Channel Names, Image Platform Model, GeoMx Imaging AOI Coordinates, and Image Software are all listed as Required = False, even though they describe central imaging details.",
+    "id": "3cad426b-56f3-4d96-9460-1a6eb1db1d0d"
+  },
+  {
+    "question": "A data manager is trying to figure out which GeoMx module records the raw scan images and instrument acquisition settings, versus which module records the spatial coordinates and QC status of the profiled tissue regions. Which statement correctly distinguishes the GeoMx Imaging module from the GeoMx ROI Segment Annotation module?",
+    "mc1_targets": {
+      "choices": [
+        "GeoMx Imaging documents the raw scan images along with instrument/acquisition metadata (platform, objective, magnification, etc.), while GeoMx ROI Segment Annotation documents the ROI/AOI names, coordinates, and QC metrics for each profiled region",
+        "GeoMx Imaging documents ROI/AOI coordinates and QC status, while GeoMx ROI Segment Annotation documents instrument acquisition settings like objective and magnification",
+        "Both modules exclusively capture sequencing read-processing metrics such as aligned and deduplicated reads",
+        "GeoMx Imaging documents fully processed expression matrices, while GeoMx ROI Segment Annotation documents raw sequencing reads",
+        "GeoMx ROI Segment Annotation documents the imaging channel names, while GeoMx Imaging documents the negative control and limit-of-quantification values"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "X",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/geomxImaging/",
+      "https://mc2-center.github.io/data-models/model/geomxRoi/"
+    ],
+    "context": "GeoMx Imaging page: 'A NanoString GeoMx Imaging entry documents the images acquired directly by the GeoMx Digital Spatial Profiler (DSP) instrument... this module also captures detailed instrument- and file-format-level imaging metadata: platform model and manufacturer, acquisition software, objective and magnification...'. GeoMx ROI Segment Annotation page: 'A NanoString GeoMx ROI Segment Annotation entry documents the Region of Interest (ROI) and Area of Illumination (AOI)/segment metadata... together with the ROI and AOI names and coordinates, scan- and slide-level identifiers, and quality control status as reported by the GeoMx DSP application.'",
+    "id": "510b169b-a4af-4614-81b2-4684e4fb4b47"
+  },
+  {
+    "question": "According to the Grant data model documentation, who is currently permitted to contribute new Grant entries to the MC2 Center data model?",
+    "mc1_targets": {
+      "choices": [
+        "Any Principal Investigator (PI) can submit new grant entries directly",
+        "Grant entries are curated exclusively by MC2 Center staff, and external contributions are not currently accepted",
+        "Research Administrators and Data Managers can jointly submit new grant entries",
+        "Any registered Synapse user with edit access to the Grant Synapse Team",
+        "Consortia and Collaborative Project Leads may submit entries on behalf of their institution"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/grant/"
+    ],
+    "context": "At this time, grant entries are curated exclusively by MC2 Center staff and are not open for external contributions. If broader contribution access is introduced in the future, updated guidelines will be provided.",
+    "id": "71d8948a-9e1b-4897-b441-ef30474cca9f"
+  },
+  {
+    "question": "In the Imaging Channel data model, which of the following attributes is marked as Required (True), meaning an entry cannot be submitted without it?",
+    "mc1_targets": {
+      "choices": [
+        "Channel Antibody Name",
+        "Channel Target Name",
+        "Channel Fluorophore",
+        "Channel Metal Symbol",
+        "Channel Antibody Clone"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/imagingChannel/"
+    ],
+    "context": "Channel Target Name | Short descriptive name (abbreviation) for this target (antigen) | True | string ... Channel Antibody Name | Antibody Name (free text (eg \"Keratin\", \"CD163\", \"DNA\")) | False | string ...",
+    "id": "63b2c10a-8f16-4d2d-93ea-28fd792e5852"
+  },
+  {
+    "question": "In an Imaging Level 2 entry, what does the boolean 'Image Pyramidal' attribute indicate?",
+    "mc1_targets": {
+      "choices": [
+        "Whether the data file contains a pyramid of images (i.e., multiple resolution levels)",
+        "Whether the data file contains a Z-stack of images",
+        "Whether the data file contains a time-series of images",
+        "Whether the pixel byte order is big-endian",
+        "Whether multiple imaging frames were averaged together"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/imagingLevel2/"
+    ],
+    "context": "Image Pyramidal | Does data file contain pyramid of images | False | boolean ... Image Z stack | Does data file contain a Z-stack of images ... Image Timeseries | Does data file contain a time-series of images ... Image Pixels BigEndian | Boolean (True/False)",
+    "id": "e337ddac-8100-4d00-a23f-94656f4e2388"
+  },
+  {
+    "question": "A data reuser wants imagery that has already been quality-controlled and co-registered (channels or cycles aligned), rather than the original raw acquisition output. Which imaging entity in the MC2 Center data model should they look for?",
+    "mc1_targets": {
+      "choices": [
+        "Imaging Level 1, since it is the earliest and most complete acquisition record",
+        "Imaging Channel, since it documents the reagents and detection parameters",
+        "Imaging Level 3 (Image), since it describes quality-controlled or co-registered image data",
+        "Imaging Level 2, since it is described as the earliest processed output",
+        "There is no distinct entity for this; QC status is not tracked separately from raw files"
+      ],
+      "labels": [
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/imagingLevel1/",
+      "https://mc2-center.github.io/data-models/model/imagingLevel3Image/"
+    ],
+    "context": "Imaging Level 1: 'An Imaging Level 1 entry describes a raw imaging data file \u2014 the unprocessed output of a microscope, scanner, or other imaging platform, prior to any quality control, co-registration, or downstream processing.' Imaging Level 3 (Image): 'An Imaging Level 3 (Image) entry describes quality-controlled or co-registered image data \u2014 imagery that has been processed beyond the raw and pre-processed stages to correct artifacts, align channels or cycles, and confirm suitability for downstream analysis.'",
+    "id": "1f4b7241-cb15-486d-aad5-05c61409e33e"
+  },
+  {
+    "question": "How does an Imaging Level 1 entry connect to the antibody/reagent metadata recorded for a specific detection channel used during acquisition?",
+    "mc1_targets": {
+      "choices": [
+        "Through the 'Biospecimen Key', which links directly to antibody metadata",
+        "Through the 'ImagingChannel Key', which links to the corresponding Imaging Channel entry",
+        "Through the 'Study Key', which stores antibody vendor and clone information",
+        "Automatically, since Imaging Level 1 entries embed antibody fields directly in the same row",
+        "Through the 'DatasetView Key', which aggregates all channel metadata for a dataset"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/imagingChannel/",
+      "https://mc2-center.github.io/data-models/model/imagingLevel1/"
+    ],
+    "context": "Imaging Channel: 'Imaging Channel entries are typically submitted as a table with one row per channel per assay, and are then linked from the imaging file-level modules (Imaging Level 1 and Imaging Level 2) via the `ImagingChannel Key`.' Imaging Level 1: 'Because raw images are typically generated per-channel or per-acquisition, Imaging Level 1 entries link back to the corresponding channel metadata via the `ImagingChannel Key`, and forward to the biospecimen that was imaged via `Biospecimen Key`.'",
+    "id": "005ad187-2318-41ed-bacc-4725264e6110"
+  },
+  {
+    "question": "A funder reviewing the Grant field reference notices an 'Embargo End Date' column. Based on the documentation, is this field required for every Grant entry?",
+    "mc1_targets": {
+      "choices": [
+        "No, it is optional (Required = False), used only when an embargo applies to related resources",
+        "Yes, it is required for every grant regardless of embargo status",
+        "Yes, but only for grants with a Duration of Funding greater than 5 years",
+        "No, because the Grant model does not track embargoes at all",
+        "Yes, it is required whenever a Grant Synapse Project is specified"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "FUNDER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/grant/"
+    ],
+    "context": "Embargo End Date | Date at which an embargo on related resources had lifted | False | string | date | *None* | None | 2026-01-01",
+    "id": "3d316d05-ba67-4d56-88d1-bcd39190f8e2"
+  },
+  {
+    "question": "In the Imaging Level 3 (Segments) full field reference, which attribute is actually marked as Required, even though other fields describing the segmentation (like the object class being delineated) are optional?",
+    "mc1_targets": {
+      "choices": [
+        "Image Segmentation Data Type",
+        "Image Object Class",
+        "Image Parameter file",
+        "Image Number of Objects",
+        "Software and Version"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/imagingLevel3Segments/"
+    ],
+    "context": "| Image Segmentation Data Type | Specifies how the segmentation is stored | True | string | ... | | Image Object Class | Defines the structure that the mask delineates | False | string | ... | | Image Parameter file | Path in Synapse to a text file listing algorithm version numbers and relevant parameters needed to reproduce the analysis | False | string | ... | | Image Number of Objects | The number of objects (eg cells) described | False | number | ...",
+    "id": "fa3aa172-6335-4b1b-a5c8-df2216bb07f7"
+  },
+  {
+    "question": "A reuser is checking which fields must be filled in for every Imaging Level 4 entry. Which of the following is marked Required (True) in the field reference table?",
+    "mc1_targets": {
+      "choices": [
+        "Image Summary Statistic",
+        "Image Number of Objects",
+        "Image Software",
+        "Image Parameter file",
+        "Image Object Class"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/imagingLevel4/"
+    ],
+    "context": "| Image Software | The name of the software package that was used to capture, generate, and process the image. | False | ... | | Image Number of Objects | The number of objects (eg cells) described | False | number | ... | | Image Object Class | Defines the structure that the mask delineates | False | string | ... | | Image Summary Statistic | Function used to summarize object/feature intensity | True | string | ...",
+    "id": "04c3e0d6-8f44-4621-ae3c-459acddf8f37"
+  },
+  {
+    "question": "A reuser is trying to understand the difference between an Imaging Level 3 (Segments) entry and an Imaging Level 4 entry in the imaging pipeline. Which statement correctly distinguishes the two?",
+    "mc1_targets": {
+      "choices": [
+        "Level 3 (Segments) describes segmentation mask output (how objects were delineated), while Level 4 describes the derived object-by-feature quantitative array summarized from those segmented objects.",
+        "Level 3 (Segments) is only for human specimens, while Level 4 is only for non-human model organisms.",
+        "Level 4 stores segmentation masks and outlines, while Level 3 (Segments) stores the summarized object-by-feature array.",
+        "There is no meaningful difference between the two levels; they capture the same information twice for redundancy.",
+        "Level 3 (Segments) contains raw pixel intensity data, while Level 4 contains the parameter file used to reproduce imaging."
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/imagingLevel3Segments/",
+      "https://mc2-center.github.io/data-models/model/imagingLevel4/"
+    ],
+    "context": "Imaging Level 3 (Segments): 'An Imaging Level 3 (Segments) entry describes image segmentation mask information \u2014 the output of algorithms that delineate objects of interest ... Rather than pixel intensity data, this module captures how segmentation results are stored (mask, outline, polygon, probability map, or point representation), the object class being segmented, the number of objects identified, and a pointer to the parameter file needed to reproduce the segmentation.' Imaging Level 4: 'An Imaging Level 4 entry describes derived imaging data in the form of an object-by-feature array \u2014 the quantitative output produced after segmented objects (e.g. cells) have had their features (e.g. per-channel marker intensities, morphology) extracted and summarized. Rather than image or mask files, this module captures tabular, analysis-ready data...' Imaging Level 4 entries 'reference the full processing lineage that produced them, linking back to the pre-processed image (ImagingLevel2 Key), the QC'd/co-registered image (ImagingLevel3Image Key), and the segmentation used (ImagingLevel3Segments Key).'",
+    "id": "162b87e8-7e1d-49f5-b887-223979879e72"
+  },
+  {
+    "question": "According to the Individual full field reference, which of the following attributes is marked Required (True)?",
+    "mc1_targets": {
+      "choices": [
+        "Individual Sex",
+        "Individual Vital Status",
+        "Individual Recurrence Status",
+        "Individual Tumor Grade",
+        "Individual Treatment Type"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/individual/"
+    ],
+    "context": "| Individual Sex | Biological sex associated with the specimen donor | True | string | ... | | Individual Vital Status | Text term that describes the patient's current vital status. | False | string | ... | | Individual Recurrence Status | Yes/No/Unknown indicator to identify whether a patient has had a new tumor event after initial treatment. | False | string | ... | | Individual Tumor Grade | ... | False | ... | | Individual Treatment Type | ... | False | ...",
+    "id": "8532ea0d-9aec-4e8a-a3f9-064aeb18aad9"
+  },
+  {
+    "question": "A contributor is documenting a patient-derived xenograft (PDX) Model entry and wants to record which human Individual the model was derived from. According to the field references, how should this link be made?",
+    "mc1_targets": {
+      "choices": [
+        "Use the Model entry's 'Individual Key' field to reference the Individual_id; the 'Model Source' field should not be used to designate an Individual as the source of the model.",
+        "Use the Model entry's 'Model Source' field to reference the Individual_id directly, since 'Individual Key' is reserved for linking models to other models.",
+        "Use only 'Model Graft Source' for this purpose, since 'Individual Key' was deprecated in favor of graft tracking.",
+        "Either 'Individual Key' or 'Model Source' may be used interchangeably to designate the source Individual.",
+        "Individuals cannot be linked to Models directly; the relationship can only be established indirectly through separate Biospecimen entries."
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/model/",
+      "https://mc2-center.github.io/data-models/model/individual/"
+    ],
+    "context": "Model field reference: 'Individual Key | Unique Individual_id foreign key(s) that link metadata entries as part of the same collection...' and 'Model Source | The reference organism from which the model was derived, if applicable. This could be a specific Biospecimen Key, Model Key, mouse type, cell line, or other reference. Provide RRID if available, to link to existing cell line information. Do not use this field to designate an Individual as the source of the model.' Model page also states: 'This model outlines the key attributes needed to describe a model system, including its link back to the individual it was derived from (when applicable)...' Individual page states clinical context 'can be linked across every biospecimen, model, and dataset derived from that individual.'",
+    "id": "e405b4b4-7f9f-4ac5-bf09-164c3a01851d"
+  },
+  {
+    "question": "According to the MC2 Center Data Models Explorer homepage, which groups is the platform explicitly described as being designed to support?",
+    "mc1_targets": {
+      "choices": [
+        "Researchers, developers, and data contributors",
+        "Only funding agency program officers reviewing grant compliance",
+        "Exclusively bioinformatics core facility staff performing sequencing QC",
+        "Insurance providers processing patient claims",
+        "Journal editors performing peer review of manuscripts"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "X",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/"
+    ],
+    "context": "'This platform is designed to support researchers, developers, and data contributors by enhancing collaboration, reproducibility, and data discovery through clear metadata standards.'",
+    "id": "9324bb25-a40b-46fc-8623-0f9f13c4bdd0"
+  },
+  {
+    "question": "Which of the following is listed as a valid value for the `GeoMx DSP Assay Type` attribute in the NanoString GeoMx Level 1 data model?",
+    "mc1_targets": {
+      "choices": [
+        "Protein NGS",
+        "DNA nCounter",
+        "Whole Genome Sequencing",
+        "Single Cell RNA-Seq"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/valid_values/geomxLevel1/"
+    ],
+    "context": "Attribute: `GeoMx DSP Assay Type` | Valid Value | Description |\n| --- | --- |\n| RNA nCounter | nan |\n| Protein nCounter | nan |\n| Protein NGS | nan |\n| RNA NGS | nan |",
+    "id": "2adf1154-1617-4af8-8a05-1ff541a09ad2"
+  },
+  {
+    "question": "A contributor is filling out a Person entry for the CCKP and wants to know which fields cannot be left blank. According to the Person model's Full Field Reference, which of the following attributes is marked Required = True?",
+    "mc1_targets": {
+      "choices": [
+        "Working Group Participation",
+        "Email",
+        "Alternative Names",
+        "Synapse Profile Id",
+        "Url"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/person/"
+    ],
+    "context": "| Working Group Participation | CSBC/PSON working group(s) of which the individual is a member (current and former). Multiple values permitted, comma separated. | True | string_list | ... |\n| Email | Email address of the individual | False | string | ... |\n| Alternative Names | Other ways the individual's name is displayed. | False | string_list | ... |\n| Synapse Profile Id | Unique identifier (Synapse Profile ID) of the individual. | False | string | ... |",
+    "id": "68cf53e7-59f4-482d-bfe7-57a9622e6844"
+  },
+  {
+    "question": "For a Publication entry submitted to the CCKP, what should the `PublicationView_id` value typically be equivalent to?",
+    "mc1_targets": {
+      "choices": [
+        "The PubMed Id of the publication",
+        "The publication's DOI",
+        "The associated GrantView Key",
+        "The publication's journal name"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/publication/"
+    ],
+    "context": "PublicationView_id | Unique row identifier, used as a primary key for record updates. This should be equivalent to the PubMed Id, unless directed otherwise. | True | string | ... | PublicationView_45678",
+    "id": "f692efb7-d474-4548-b459-17526ecd2448"
+  },
+  {
+    "question": "A data manager reusing raw sequencing metadata notices the `NGS Raw Reads` field is empty on several Sequencing Level 1 records. Is this a data-entry error?",
+    "mc1_targets": {
+      "choices": [
+        "No, NGS Raw Reads is marked Required = False, so it can legitimately be left blank",
+        "Yes, NGS Raw Reads is a required field and must always be filled in",
+        "No, but only because the file is a Sequencing Level 2 record instead",
+        "Yes, unless the NGS Library Layout is 'Single'"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/sequencingLevel1/"
+    ],
+    "context": "NGS Raw Reads | Reads not yet analyzed in any way to be used for data analysis. The number of reads that pass filter from the flow cell represented in the FASTQ file. | False | number | ... |",
+    "id": "7aea3c3a-c3e2-4169-b30d-7d8582048253"
+  },
+  {
+    "question": "A researcher wants to reprocess a dataset and needs to understand the difference between the Sequencing Level 1 and Sequencing Level 2 entries for the same sample. Which statement correctly describes that difference?",
+    "mc1_targets": {
+      "choices": [
+        "Level 1 documents raw, unaligned sequencing reads (e.g., FASTQ files) with library/platform metadata, while Level 2 documents data that has been aligned to a reference genome and adds metrics like aligned reads and MapQ30",
+        "Level 1 documents aligned reads and Level 2 documents the raw unaligned reads produced by the sequencer",
+        "Level 1 and Level 2 use identical field sets and differ only in file naming convention",
+        "Level 2 is only generated for GeoMx assays, while Level 1 is used exclusively for standard NGS sequencing"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/sequencingLevel1/",
+      "https://mc2-center.github.io/data-models/model/sequencingLevel2/"
+    ],
+    "context": "Sequencing Level 1: 'A Sequencing Level 1 entry documents the raw, unaligned sequencing reads produced directly by a sequencer, before any downstream processing or alignment has been applied... alongside...NGS library and platform metadata such as library strategy, selection method, read length, raw read counts, and sequencing coverage.' Sequencing Level 2: 'A Sequencing Level 2 entry documents sequencing data that has been aligned to a reference genome. This level builds directly on a Sequencing Level 1 file and adds alignment-specific metrics, such as aligned reads, deduplicated reads, trimmed reads, mapping quality (MapQ30), and the genomic reference and software version used to perform the alignment.'",
+    "id": "14deb48f-e021-4501-9b57-096985af0157"
+  },
+  {
+    "question": "A funder reviewing productivity reports wants to trace which publications resulted from a specific researcher's work using the CCKP data model. Which identifier is recorded on both the Person entry and the Publication entry to make that link?",
+    "mc1_targets": {
+      "choices": [
+        "The PubMed Id",
+        "The ORCID iD",
+        "The Synapse Profile Id",
+        "The GrantView Key"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "FUNDER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/person/",
+      "https://mc2-center.github.io/data-models/model/publication/"
+    ],
+    "context": "Person: 'Person Publications | A list of the pubmed Ids associated with the person. Multiple values permitted, comma separated. | False | string_list'. Publication: 'Pubmed Id | The PubMed identifier associated with the publication. | True | string'.",
+    "id": "b686e3e9-01f5-4de5-a55f-278cb475c89d"
+  },
+  {
+    "question": "According to the Study full field reference table, is the `Study Data Use Codes` attribute required for every Study entry?",
+    "mc1_targets": {
+      "choices": [
+        "Yes, every Study entry must include at least one DUO code",
+        "No, it is optional overall, but selecting certain DUO/DUOPlus codes makes specific companion fields conditionally required",
+        "No, it is optional and selecting a code never affects any other field",
+        "Yes, but only for studies using controlled-access dbGaP data"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/study/"
+    ],
+    "context": "Field reference table: 'Study Data Use Codes | DUO code - A data item that is used to indicate consent permissions... | False | string_list'. Explanatory text: 'A subset of terms, however, indicate that additional detail must be provided alongside the code... Selecting the code makes its companion field conditionally required; all other companion fields remain optional.' For example, a Study entry with Study Data Use Codes set to DUO:0000024, DUO:0000022 must also provide publicationMoratorium and geographicalRestriction.",
+    "id": "2b994de1-3cac-43b0-9445-32b4f09360c5"
+  },
+  {
+    "question": "A contributor is filling out a new Tool entry and wants to know which attribute they cannot leave blank. Based on the Tool full field reference table, which of these attributes is marked as required (True)?",
+    "mc1_targets": {
+      "choices": [
+        "Tool Version",
+        "Tool License",
+        "Tool Doi",
+        "Tool Operating System"
+      ],
+      "labels": [
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/tool/"
+    ],
+    "context": "Field reference table rows: 'Tool Version | ... | False', 'Tool License | ... | False', 'Tool Operating System | ... | False', but 'Tool Doi | The Digital Object Identifier (DOI) associated with the computational tool. | True | string | uri'.",
+    "id": "f9cbebbc-bf98-42f7-b27c-cc8454ff3b90"
+  },
+  {
+    "question": "A researcher reusing an RNA-seq dataset sees that its Sequencing RNA Level 1 record has a 'NGS RNA End Bias' value of '3 prime'. What does this attribute actually describe?",
+    "mc1_targets": {
+      "choices": [
+        "The percentage of RNA fragments in the sample that are longer than 200 nucleotides",
+        "The end of the cDNA molecule that is preferentially sequenced (e.g., 3 prime, 5 prime, or full-length transcript coverage)",
+        "The numerical integrity score of the RNA sample based on its electrophoretic trace",
+        "The direction (forward or reverse) in which the sequencing platform reads the library"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/sequencingRNALevel1/"
+    ],
+    "context": "'NGS RNA End Bias | The end of the cDNA molecule that is preferentially sequenced, e.g. 3/5 prime tag/end or the full length transcript'. This is distinct from 'NGS RNA RIN' (RNA integrity) and 'NGS RNA DV200' (percentage of RNA fragments >200 nucleotides), which are separate attributes on the same page.",
+    "id": "dd621cc3-7cda-4552-a08f-7ef977c83802"
+  },
+  {
+    "question": "What kind of information does a 10x Visium Auxiliary Files entry document on the CCKP?",
+    "mc1_targets": {
+      "choices": [
+        "The primary spatial gene expression count matrix produced by a Visium run",
+        "Raw, unaligned sequencing reads generated by the Visium instrument",
+        "Supporting files such as tissue images, scale factors, and QC reports linked back to the Visium RNA Level 1-4 data, biospecimen, and study",
+        "The computational workflow parameters used to align Visium reads to a reference genome"
+      ],
+      "labels": [
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/visiumRNAAux/"
+    ],
+    "context": "'A 10x Visium Auxiliary Files entry documents supporting data associated with 10x Genomics Visium spatial transcriptomics experiments, such as aligned tissue images, quality control reports, and other files that accompany the primary sequencing and expression outputs of a Visium run. Rather than representing a sequencing or expression level itself, this module links auxiliary artifacts... back to the Visium RNA Level 1 through 4 files, biospecimen, and study they belong to.'",
+    "id": "7021a8fb-735f-45a1-bd9b-e3766989c144"
+  },
+  {
+    "question": "A reuser is looking for the processed gene count matrix from an RNA-seq experiment on the CCKP and wants to know how that differs from what a Sequencing RNA Level 1 record contains. Which statement correctly distinguishes Sequencing Level 3 from Sequencing RNA Level 1?",
+    "mc1_targets": {
+      "choices": [
+        "Sequencing Level 3 documents processed count matrices derived from a Level 2 alignment, while Sequencing RNA Level 1 documents raw, unaligned RNA sequencing data with RNA-specific library metadata like RIN and end bias",
+        "Sequencing RNA Level 1 documents the final normalized count matrix, while Sequencing Level 3 documents only the raw FASTQ reads",
+        "Both levels document identical count matrix data, differing only in which species they apply to",
+        "Sequencing Level 3 documents RNA integrity metrics, while Sequencing RNA Level 1 documents count matrices"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/sequencingLevel3/",
+      "https://mc2-center.github.io/data-models/model/sequencingRNALevel1/"
+    ],
+    "context": "Sequencing Level 3: 'A Sequencing Level 3 entry documents further-processed sequencing data derived from a Sequencing Level 2 alignment, such as count matrices or probe-level summaries. This level captures matrix-type metadata (raw, normalized, scaled, or batch-corrected counts)...'. Sequencing RNA Level 1: 'A Sequencing RNA Level 1 entry documents raw, unaligned RNA sequencing data, extending the general Sequencing Level 1 structure with RNA-specific library metadata... such as end bias..., reverse transcription primer type, RNA integrity number (RIN), and DV200.'",
+    "id": "a2cec471-73f3-4762-9793-647ae981b26e"
+  },
+  {
+    "question": "A program officer at a funding agency is reviewing what grant-funded outputs are documented on the CCKP. How do 'Study' entries and 'Tool' entries differ in the kind of information they track?",
+    "mc1_targets": {
+      "choices": [
+        "Study entries document research project details such as investigators, participants, and data use restrictions; Tool entries document software applications including their inputs, outputs, licensing, and dependencies",
+        "Study entries document software applications and their licenses; Tool entries document research participants and ethical considerations",
+        "Both entry types track identical fields, just under different names",
+        "Study entries only link to publications, while Tool entries only link to datasets"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "FUNDER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/study/",
+      "https://mc2-center.github.io/data-models/model/tool/"
+    ],
+    "context": "Study: 'A Study entry documents key information about research projects, including methodologies, participants, and ethical considerations.' Tool: 'A Tool entry documents software applications, utilities, or platforms designed to perform specific operations in research or technical workflows... Accurate documentation ensures that tools are easily discoverable, traceable, and appropriately integrated into research processes.'",
+    "id": "80d9bff5-d872-40f0-bfa3-6255632a306e"
+  },
+  {
+    "question": "In the 10x Visium RNA Level 1 full field reference table, is the 'Visium Capture Area' attribute marked as required?",
+    "mc1_targets": {
+      "choices": [
+        "Yes, it is required at Level 1",
+        "No, it is optional (Required = False)",
+        "It is required only when using CytAssist slides",
+        "It is required only if the Visium Slide Version is unknown"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/visiumRNALevel1/"
+    ],
+    "context": "Visium Capture Area | Area (or Capture Area) - One of the either four or two active regions where tissue can be placed on a Visium slide... | False | string | *None* | *None* | [View](../../valid_values/visiumRNALevel1/#attribute-visium-capture-area)",
+    "id": "3660341b-908a-46fb-a002-959bf597616c"
+  },
+  {
+    "question": "Which of the following 10x Visium RNA Level 1 attributes is NOT required (i.e., is listed as optional) in the full field reference table?",
+    "mc1_targets": {
+      "choices": [
+        "Visium Run ID",
+        "Visium Spatial Read1",
+        "Visium Slide Version",
+        "NGS RNA RIN",
+        "Visium Spatial Library Construction Method"
+      ],
+      "labels": [
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/visiumRNALevel1/"
+    ],
+    "context": "Visium Run ID | ... | True | string; Visium Spatial Read1 | ... | True | string; Visium Slide Version | ... | True | string; Visium Spatial Library Construction Method | ... | True | string; NGS RNA RIN | A numerical assessment of the integrity of RNA based on the entire electrophoretic trace of the RNA sample including the presence or absence of degradation products. Number | False | number",
+    "id": "3639164c-1dd2-413d-b5a4-19c2bac5bf77"
+  },
+  {
+    "question": "In the 10x Visium RNA Level 2 field reference, which attribute records the SAM tag used for the unique molecular identifier (UMI) field?",
+    "mc1_targets": {
+      "choices": [
+        "Visium Spatial Barcode Tag",
+        "Visium UMI Tag",
+        "Visium Whitelist Spatial Barcode File Link",
+        "Genomic Reference"
+      ],
+      "labels": [
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/visiumRNALevel2/"
+    ],
+    "context": "Visium UMI Tag | SAM tag for the UMI field; please provide a valid tag-type pair, consisting of a tag (e.g. UB or UR) and type (e.g. Z) separated by a colon. | True | string",
+    "id": "39239d24-53fe-4a1d-bc0f-a269b35d6924"
+  },
+  {
+    "question": "According to the Visium RNA Level 3 page, what kind of information does a 10x Visium RNA Level 3 entry primarily document?",
+    "mc1_targets": {
+      "choices": [
+        "Raw slide and library metadata such as capture area and slide version",
+        "SAM tags and genomic references used during read alignment",
+        "Per-spot summary statistics such as spots under tissue, median genes, and UMI counts per spot",
+        "Workflow type and parameters used for downstream spatial clustering or differential expression"
+      ],
+      "labels": [
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    "persona": "REUSER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/visiumRNALevel3/"
+    ],
+    "context": "A 10x Visium RNA Level 3 entry documents processed spatial transcriptomics data built from a 10x Visium RNA Level 2 alignment together with its associated auxiliary files. This level captures per-spot summary statistics such as spots under tissue, mean reads per spatial spot, median genes and UMI counts per spot, sequencing coverage, and the proportion of reads mapped overall and to the transcriptome, along with the workflow version and file type generated.",
+    "id": "0f3a8246-91ef-40f3-964e-dff5a90aaded"
+  },
+  {
+    "question": "Based on the descriptions across the four 10x Visium RNA processing levels, which sequence correctly reflects the order of data processing from raw reads to final derived analysis products?",
+    "mc1_targets": {
+      "choices": [
+        "Level 1 (raw reads with slide/library metadata) -> Level 2 (alignment workflow outputs) -> Level 3 (per-spot summary statistics) -> Level 4 (derived analysis workflow/parameters)",
+        "Level 1 (alignment workflow outputs) -> Level 2 (raw reads with slide/library metadata) -> Level 3 (derived analysis workflow/parameters) -> Level 4 (per-spot summary statistics)",
+        "Level 4 (raw reads with slide/library metadata) -> Level 3 (alignment workflow outputs) -> Level 2 (per-spot summary statistics) -> Level 1 (derived analysis workflow/parameters)",
+        "Level 2 (raw reads with slide/library metadata) -> Level 1 (alignment workflow outputs) -> Level 4 (per-spot summary statistics) -> Level 3 (derived analysis workflow/parameters)"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "FUNDER",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/visiumRNALevel1/",
+      "https://mc2-center.github.io/data-models/model/visiumRNALevel2/",
+      "https://mc2-center.github.io/data-models/model/visiumRNALevel3/",
+      "https://mc2-center.github.io/data-models/model/visiumRNALevel4/"
+    ],
+    "context": "Level 1: 'A 10x Visium RNA Level 1 entry documents raw RNA sequencing data associated with a Visium spatial transcriptomics spot/slide experiment.' Level 2: 'A 10x Visium RNA Level 2 entry documents the alignment workflow outputs downstream of a 10x Visium RNA Level 1 file.' Level 3: 'A 10x Visium RNA Level 3 entry documents processed spatial transcriptomics data built from a 10x Visium RNA Level 2 alignment together with its associated auxiliary files. This level captures per-spot summary statistics...' Level 4: 'A 10x Visium RNA Level 4 entry documents further-processed data built from a 10x Visium RNA Level 3 output, capturing the generic workflow type and workflow parameters used to derive higher-order analysis products... As the most highly processed level in the Visium cluster, Level 4 entries emphasize workflow provenance...'",
+    "id": "b79a4a3c-0f07-4ce4-8a39-bd5d0c12b5ce"
+  },
+  {
+    "question": "The 'Visium Capture Area' attribute appears in the full field reference tables for which 10x Visium RNA processing levels, and what is its required status there?",
+    "mc1_targets": {
+      "choices": [
+        "It appears in Levels 1, 2, and 3, and is optional (Required = False) in each",
+        "It appears in Levels 1 through 4, and is required (Required = True) at every level",
+        "It appears only in Level 1, where it is required",
+        "It appears in Levels 2 through 4, and is optional in each"
+      ],
+      "labels": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "persona": "CONTRIBUTOR",
+    "page_urls": [
+      "https://mc2-center.github.io/data-models/model/visiumRNALevel1/",
+      "https://mc2-center.github.io/data-models/model/visiumRNALevel2/",
+      "https://mc2-center.github.io/data-models/model/visiumRNALevel3/"
+    ],
+    "context": "Level 1: 'Visium Capture Area | ... | False | string | ...'. Level 2: 'Visium Capture Area | ... | False | string | ... [View](../../valid_values/visiumRNALevel1/#attribute-visium-capture-area)'. Level 3: 'Visium Capture Area | ... | False | string | ...'. The Level 4 field reference table does not list a 'Visium Capture Area' attribute at all.",
+    "id": "c0bdaae3-2ad0-4003-b285-ee081bb50417"
+  }
+]
